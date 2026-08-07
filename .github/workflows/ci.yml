@@ -1,0 +1,88 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  django:
+    name: Django checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: ksa_games
+          POSTGRES_USER: ksa_games
+          POSTGRES_PASSWORD: ksa_games_ci_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ksa_games -d ksa_games"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      KSA_DEBUG: "true"
+      KSA_SECRET_KEY: django-insecure-ci-local-test-key
+      KSA_ALLOWED_HOSTS: localhost,127.0.0.1,[::1]
+      KSA_DATABASE_ENGINE: postgresql
+      KSA_DB_NAME: ksa_games
+      KSA_DB_USER: ksa_games
+      KSA_DB_PASSWORD: ksa_games_ci_password
+      KSA_DB_HOST: 127.0.0.1
+      KSA_DB_PORT: "5432"
+      KSA_REDIS_URL: redis://127.0.0.1:6379/0
+      KSA_CELERY_BROKER_URL: redis://127.0.0.1:6379/1
+      KSA_CELERY_RESULT_BACKEND: redis://127.0.0.1:6379/2
+      KSA_GOOGLE_OAUTH_CLIENT_ID: ""
+      KSA_GOOGLE_OAUTH_CLIENT_SECRET: ""
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+
+      - name: Run Django system checks
+        run: python manage.py check
+
+      - name: Check migrations are committed
+        run: python manage.py makemigrations --check --dry-run
+
+      - name: Apply migrations
+        run: python manage.py migrate --noinput
+
+      - name: Run tests
+        run: pytest

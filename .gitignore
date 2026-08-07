@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+*.egg-info/
+
+# Local environments
+.venv/
+.env
+
+# Local Django development
+db.sqlite3
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

@@ -1,0 +1,33 @@
+<form class="filter-panel" method="get" action="{% url 'games:catalog' %}">
+  <label>
+    Search
+    <input type="search" name="q" value="{{ filters.query }}" placeholder="Game name or keyword">
+  </label>
+  <label>
+    Category
+    <select name="category">
+      <option value="">All categories</option>
+      {% for option in active_categories %}
+        <option value="{{ option.slug }}"{% if filters.category_slug == option.slug %} selected{% endif %}>{{ option.name }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>
+    Player Count
+    <input type="number" min="1" name="min_players" value="{{ filters.min_players|default_if_none:'' }}" placeholder="Any">
+  </label>
+  <label>
+    Max Duration
+    <input type="number" min="1" name="max_duration" value="{{ filters.max_duration|default_if_none:'' }}" placeholder="Minutes">
+  </label>
+  <label class="check-row">
+    <input type="checkbox" name="bots" value="1"{% if filters.bots_only %} checked{% endif %}>
+    Bots
+  </label>
+  <label class="check-row">
+    <input type="checkbox" name="playable" value="1"{% if filters.playable_only %} checked{% endif %}>
+    Playable
+  </label>
+  <button type="submit">Apply Filters</button>
+  <a class="button secondary" href="{% url 'games:catalog' %}">Reset</a>
+</form>

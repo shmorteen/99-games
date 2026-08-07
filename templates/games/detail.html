@@ -1,0 +1,93 @@
+{% extends "games/base.html" %}
+
+{% block content %}
+  <header class="page-header">
+    <p class="muted"><a href="{% url 'games:category' game.category.slug %}">{{ game.category.name }}</a></p>
+    <h1>{{ game.name }}</h1>
+    <p class="lede">{{ game.short_description }}</p>
+    <div class="meta-row">
+      {% if game.is_playable %}
+        <span class="badge ready">Playable</span>
+      {% else %}
+        <span class="badge soon">Coming Soon</span>
+      {% endif %}
+      {% if game.is_featured %}<span class="badge">Featured</span>{% endif %}
+      <span class="badge">{{ game.minimum_players }}-{{ game.maximum_players }} players</span>
+      <span class="badge">{{ game.estimated_duration_minutes }} min</span>
+    </div>
+  </header>
+
+  <section class="detail-grid">
+    <article class="detail-panel">
+      <div class="thumb">
+        {% if game.banner %}
+          {{ game.banner }}
+        {% elif game.thumbnail %}
+          {{ game.thumbnail }}
+        {% else %}
+          {{ game.name }}
+        {% endif %}
+      </div>
+      <div class="panel-body">
+        <h2>Overview</h2>
+        <p>{{ game.full_description|default:game.short_description }}</p>
+
+        <h2 id="rules">Rules</h2>
+        {% if game.rules %}
+          <dl class="key-value">
+            {% for key, value in game.rules.items %}
+              <div><dt>{{ key }}</dt><dd>{{ value }}</dd></div>
+            {% endfor %}
+          </dl>
+        {% else %}
+          <p class="muted">Rules are being prepared.</p>
+        {% endif %}
+
+        <h2>Configuration Options</h2>
+        {% if game.default_configuration %}
+          <dl class="key-value">
+            {% for key, value in game.default_configuration.items %}
+              <div><dt>{{ key }}</dt><dd>{{ value }}</dd></div>
+            {% endfor %}
+          </dl>
+        {% else %}
+          <p class="muted">No configurable options are published yet.</p>
+        {% endif %}
+      </div>
+    </article>
+
+    <aside class="detail-panel">
+      <div class="panel-body">
+        <h2>Game Features</h2>
+        <div class="feature-list">
+          {% if game.supports_bots %}<span class="badge">Bot Support</span>{% endif %}
+          {% if game.supports_spectators %}<span class="badge">Spectator Support</span>{% endif %}
+          {% if game.supports_ranked %}<span class="badge">Ranked</span>{% endif %}
+          {% if game.supports_private_lobbies %}<span class="badge">Private Lobbies</span>{% endif %}
+          {% if game.supports_broadcasts %}<span class="badge">Broadcast</span>{% endif %}
+          {% if not game.supports_bots and not game.supports_spectators and not game.supports_ranked and not game.supports_private_lobbies and not game.supports_broadcasts %}
+            <span class="badge">Standard Catalog Entry</span>
+          {% endif %}
+        </div>
+
+        <h2>Lobby Status</h2>
+        <dl class="key-value">
+          <div><dt>Active public lobbies</dt><dd>{{ active_public_lobby_count }}</dd></div>
+          <div><dt>Player limits</dt><dd>{{ game.minimum_players }}-{{ game.maximum_players }} players</dd></div>
+        </dl>
+
+        <h2>Actions</h2>
+        {% if game.is_playable %}
+          <div class="actions" id="create-lobby">
+            <a class="button" href="#create-lobby">Create Lobby</a>
+            <a class="button secondary" href="#find-lobby">Find Lobby</a>
+            <a class="button secondary" href="#quick-match">Quick Match</a>
+            <a class="button secondary" href="#rules">View Rules</a>
+          </div>
+        {% else %}
+          <p class="muted">Lobby actions unlock when this game becomes playable.</p>
+        {% endif %}
+      </div>
+    </aside>
+  </section>
+{% endblock %}

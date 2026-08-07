@@ -1,0 +1,24 @@
+{% extends "games/base.html" %}
+
+{% block content %}
+  <header class="page-header">
+    <h1>Game Catalog</h1>
+    <p class="lede">Browse active catalog entries for upcoming and playable 99 Games experiences.</p>
+  </header>
+
+  {% include "games/_filters.html" %}
+
+  {% if games %}
+    <section class="catalog-grid" aria-label="Games">
+      {% for game in games %}
+        {% include "games/_game_card.html" %}
+      {% endfor %}
+    </section>
+    {% include "games/_pagination.html" %}
+  {% else %}
+    <section class="empty-state">
+      <h2>No games found</h2>
+      <p class="muted">Try a different search, category, player count, duration, or availability filter.</p>
+    </section>
+  {% endif %}
+{% endblock %}

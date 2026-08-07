@@ -1,0 +1,15 @@
+{% if page_obj.paginator.num_pages > 1 %}
+  <nav class="pagination" aria-label="Catalog pagination">
+    <div>
+      Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+    </div>
+    <div class="actions">
+      {% if page_obj.has_previous %}
+        <a class="button secondary" href="?{{ pagination_query }}page={{ page_obj.previous_page_number }}">Previous</a>
+      {% endif %}
+      {% if page_obj.has_next %}
+        <a class="button secondary" href="?{{ pagination_query }}page={{ page_obj.next_page_number }}">Next</a>
+      {% endif %}
+    </div>
+  </nav>
+{% endif %}

@@ -1,0 +1,26 @@
+<!doctype html>
+{% load socialaccount %}
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Sign In</title>
+</head>
+<body>
+  <main>
+    <h1>Sign In</h1>
+    <form method="post" action="{% url 'account_login' %}">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit">Sign In</button>
+    </form>
+    {% get_providers as socialaccount_providers %}
+    {% for provider in socialaccount_providers %}
+      {% if provider.id == "google" %}
+        <p>
+          <a href="{% provider_login_url provider process='login' %}">Continue with Google</a>
+        </p>
+      {% endif %}
+    {% endfor %}
+  </main>
+</body>
+</html>

@@ -1,0 +1,25 @@
+{% extends "games/base.html" %}
+
+{% block content %}
+  <header class="page-header">
+    <p class="muted">Category</p>
+    <h1>{{ category.name }}</h1>
+    {% if category.description %}<p class="lede">{{ category.description }}</p>{% endif %}
+  </header>
+
+  {% include "games/_filters.html" %}
+
+  {% if games %}
+    <section class="catalog-grid" aria-label="{{ category.name }} games">
+      {% for game in games %}
+        {% include "games/_game_card.html" %}
+      {% endfor %}
+    </section>
+    {% include "games/_pagination.html" %}
+  {% else %}
+    <section class="empty-state">
+      <h2>No active games in this category</h2>
+      <p class="muted">This category is ready for catalog entries when games are added.</p>
+    </section>
+  {% endif %}
+{% endblock %}

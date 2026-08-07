@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ page_title }} - 99 Games</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #17202a;
+      --muted: #5f6c7b;
+      --line: #d8dee7;
+      --surface: #f7f9fb;
+      --panel: #ffffff;
+      --accent: #146c75;
+      --accent-ink: #ffffff;
+      --warn: #8a5a00;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--surface);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+    }
+
+    a {
+      color: var(--accent);
+    }
+
+    .site-shell {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 48px;
+    }
+
+    .top-nav {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      padding: 0 0 24px;
+    }
+
+    .brand {
+      color: var(--ink);
+      font-size: 1rem;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .page-header {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 4vw, 3.4rem);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    h2,
+    h3 {
+      letter-spacing: 0;
+    }
+
+    .lede,
+    .muted {
+      color: var(--muted);
+    }
+
+    .filter-panel {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 12px;
+      align-items: end;
+      margin-bottom: 22px;
+      padding: 16px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    label {
+      display: grid;
+      gap: 4px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 650;
+    }
+
+    input,
+    select {
+      width: 100%;
+      min-height: 40px;
+      color: var(--ink);
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 8px 10px;
+      font: inherit;
+    }
+
+    .check-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 40px;
+      padding: 8px 0;
+    }
+
+    .check-row input {
+      width: auto;
+      min-height: auto;
+    }
+
+    .button,
+    button {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 40px;
+      border: 0;
+      border-radius: 6px;
+      padding: 9px 14px;
+      color: var(--accent-ink);
+      background: var(--accent);
+      font: inherit;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .button.secondary {
+      color: var(--accent);
+      background: #e8f5f4;
+    }
+
+    .catalog-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .game-card,
+    .detail-panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .thumb {
+      display: grid;
+      place-items: center;
+      min-height: 132px;
+      color: var(--muted);
+      background: linear-gradient(135deg, #dbeafe, #ecfeff 55%, #fef3c7);
+      font-size: 0.9rem;
+      font-weight: 700;
+      text-align: center;
+      padding: 14px;
+    }
+
+    .card-body,
+    .panel-body {
+      display: grid;
+      gap: 12px;
+      padding: 16px;
+    }
+
+    .meta-row,
+    .feature-list,
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 26px;
+      border-radius: 999px;
+      padding: 4px 9px;
+      background: #eef2f7;
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    .badge.ready {
+      background: #e3f7ec;
+      color: #17633a;
+    }
+
+    .badge.soon {
+      background: #fff5d8;
+      color: var(--warn);
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(280px, 0.7fr);
+      gap: 18px;
+    }
+
+    .key-value {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+    }
+
+    .key-value div {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 8px;
+    }
+
+    .pagination {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin-top: 22px;
+    }
+
+    .empty-state {
+      padding: 28px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    @media (max-width: 880px) {
+      .filter-panel,
+      .catalog-grid,
+      .detail-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .site-shell {
+        width: min(100% - 24px, 720px);
+        padding-top: 20px;
+      }
+
+      .top-nav,
+      .pagination {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="site-shell">
+    <nav class="top-nav" aria-label="Primary">
+      <a class="brand" href="{% url 'project-shell' %}">99 Games</a>
+      <div class="nav-links">
+        <a href="{% url 'games:catalog' %}">Catalog</a>
+        <a href="{% url 'account_login' %}">Sign In</a>
+      </div>
+    </nav>
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

@@ -1,0 +1,11 @@
+.git/
+.pytest_cache/
+.venv/
+*.egg-info/
+__pycache__/
+*.py[cod]
+.coverage
+.env
+db.sqlite3
+Dockerfile
+docker-compose.yml

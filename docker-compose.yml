@@ -1,0 +1,92 @@
+services:
+  web:
+    build:
+      context: .
+    command: daphne -b 0.0.0.0 -p 8000 ksa_games.asgi:application
+    environment:
+      KSA_DEBUG: ${KSA_DEBUG:-true}
+      KSA_SECRET_KEY: ${KSA_SECRET_KEY:-django-insecure-compose-local-dev-change-me}
+      KSA_ALLOWED_HOSTS: ${KSA_ALLOWED_HOSTS:-localhost,127.0.0.1,[::1],0.0.0.0,web}
+      KSA_DATABASE_ENGINE: ${KSA_DATABASE_ENGINE:-postgresql}
+      KSA_DB_NAME: ${KSA_DB_NAME:-ksa_games}
+      KSA_DB_USER: ${KSA_DB_USER:-ksa_games}
+      KSA_DB_PASSWORD: ${KSA_DB_PASSWORD:-ksa_games_dev_password}
+      KSA_DB_HOST: ${KSA_DB_HOST:-db}
+      KSA_DB_PORT: ${KSA_DB_PORT:-5432}
+      KSA_REDIS_URL: ${KSA_REDIS_URL:-redis://redis:6379/0}
+      KSA_CHANNEL_PREFIX: ${KSA_CHANNEL_PREFIX:-ksa-games}
+      KSA_CELERY_BROKER_URL: ${KSA_CELERY_BROKER_URL:-redis://redis:6379/1}
+      KSA_CELERY_RESULT_BACKEND: ${KSA_CELERY_RESULT_BACKEND:-redis://redis:6379/2}
+      KSA_CELERY_TASK_DEFAULT_QUEUE: ${KSA_CELERY_TASK_DEFAULT_QUEUE:-ksa-games}
+      KSA_CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP: ${KSA_CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP:-true}
+      KSA_GOOGLE_OAUTH_CLIENT_ID: ${KSA_GOOGLE_OAUTH_CLIENT_ID:-}
+      KSA_GOOGLE_OAUTH_CLIENT_SECRET: ${KSA_GOOGLE_OAUTH_CLIENT_SECRET:-}
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "from urllib.request import urlopen; urlopen('http://127.0.0.1:8000/health/live/', timeout=2).read()"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  worker:
+    build:
+      context: .
+    command: celery -A ksa_games worker --loglevel=info
+    environment:
+      KSA_DEBUG: ${KSA_DEBUG:-true}
+      KSA_SECRET_KEY: ${KSA_SECRET_KEY:-django-insecure-compose-local-dev-change-me}
+      KSA_ALLOWED_HOSTS: ${KSA_ALLOWED_HOSTS:-localhost,127.0.0.1,[::1],0.0.0.0,web}
+      KSA_DATABASE_ENGINE: ${KSA_DATABASE_ENGINE:-postgresql}
+      KSA_DB_NAME: ${KSA_DB_NAME:-ksa_games}
+      KSA_DB_USER: ${KSA_DB_USER:-ksa_games}
+      KSA_DB_PASSWORD: ${KSA_DB_PASSWORD:-ksa_games_dev_password}
+      KSA_DB_HOST: ${KSA_DB_HOST:-db}
+      KSA_DB_PORT: ${KSA_DB_PORT:-5432}
+      KSA_REDIS_URL: ${KSA_REDIS_URL:-redis://redis:6379/0}
+      KSA_CHANNEL_PREFIX: ${KSA_CHANNEL_PREFIX:-ksa-games}
+      KSA_CELERY_BROKER_URL: ${KSA_CELERY_BROKER_URL:-redis://redis:6379/1}
+      KSA_CELERY_RESULT_BACKEND: ${KSA_CELERY_RESULT_BACKEND:-redis://redis:6379/2}
+      KSA_CELERY_TASK_DEFAULT_QUEUE: ${KSA_CELERY_TASK_DEFAULT_QUEUE:-ksa-games}
+      KSA_CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP: ${KSA_CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP:-true}
+      KSA_GOOGLE_OAUTH_CLIENT_ID: ${KSA_GOOGLE_OAUTH_CLIENT_ID:-}
+      KSA_GOOGLE_OAUTH_CLIENT_SECRET: ${KSA_GOOGLE_OAUTH_CLIENT_SECRET:-}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${KSA_DB_NAME:-ksa_games}
+      POSTGRES_USER: ${KSA_DB_USER:-ksa_games}
+      POSTGRES_PASSWORD: ${KSA_DB_PASSWORD:-ksa_games_dev_password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly no
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+volumes:
+  postgres_data:

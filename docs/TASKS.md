@@ -1,28 +1,28 @@
 # Current milestone: Platform Foundation
 
-- [ ] KSA-001 Initialize Django project and settings
-- [ ] KSA-002 Configure PostgreSQL
-- [ ] KSA-003 Configure Redis and Django Channels
-- [ ] KSA-004 Configure Celery
-- [ ] KSA-005 Add email/password authentication
-- [ ] KSA-006 Add ArenaProfile
-- [ ] KSA-007 Add Google OAuth configuration
-- [ ] KSA-008 Add health checks
-- [ ] KSA-009 Add Docker Compose
-- [ ] KSA-010 Add GitHub Actions
+- [x] KSA-001 Initialize Django project and settings
+- [x] KSA-002 Configure PostgreSQL
+- [x] KSA-003 Configure Redis and Django Channels
+- [x] KSA-004 Configure Celery
+- [x] KSA-005 Add email/password authentication
+- [x] KSA-006 Add ArenaProfile
+- [x] KSA-007 Add Google OAuth configuration
+- [x] KSA-008 Add health checks
+- [x] KSA-009 Add Docker Compose
+- [x] KSA-010 Add GitHub Actions
 
 # Current milestone: Game Platform Core
 
-- [ ] KSA-011 Add GameCategory
-- [ ] KSA-012 Add GameDefinition
-- [ ] KSA-013 Add game catalog pages
-- [ ] KSA-014 Add BaseGameEngine
-- [ ] KSA-015 Add GameEngineRegistry
-- [ ] KSA-016 Add GameLobby
-- [ ] KSA-017 Add LobbyMembership
-- [ ] KSA-018 Add lobby join/leave service
-- [ ] KSA-019 Add lobby WebSocket consumer
-- [ ] KSA-020 Add ready-check and game start
+- [x] KSA-011 Add GameCategory
+- [x] KSA-012 Add GameDefinition
+- [x] KSA-013 Add game catalog pages
+- [x] KSA-014 Add BaseGameEngine
+- [x] KSA-015 Add GameEngineRegistry
+- [x] KSA-016 Add GameLobby
+- [x] KSA-017 Add LobbyMembership
+- [x] KSA-018 Add lobby join/leave service
+- [x] KSA-019 Add lobby WebSocket consumer
+- [x] KSA-020 Add ready-check and game start
 
 # Current milestone: Connect4
 

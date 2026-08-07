@@ -1,0 +1,34 @@
+<article class="game-card">
+  <div class="thumb">
+    {% if game.thumbnail %}
+      {{ game.thumbnail }}
+    {% else %}
+      {{ game.name }}
+    {% endif %}
+  </div>
+  <div class="card-body">
+    <div class="meta-row">
+      <a class="badge" href="{% url 'games:category' game.category.slug %}">{{ game.category.name }}</a>
+      {% if game.is_playable %}
+        <span class="badge ready">Playable</span>
+      {% else %}
+        <span class="badge soon">Coming Soon</span>
+      {% endif %}
+    </div>
+    <h2><a href="{% url 'games:detail' game.slug %}">{{ game.name }}</a></h2>
+    <p>{{ game.short_description }}</p>
+    <div class="meta-row">
+      <span class="badge">{{ game.minimum_players }}-{{ game.maximum_players }} players</span>
+      <span class="badge">{{ game.estimated_duration_minutes }} min</span>
+      {% if game.supports_bots %}<span class="badge">Bots</span>{% endif %}
+      {% if game.supports_spectators %}<span class="badge">Spectators</span>{% endif %}
+      {% if game.supports_ranked %}<span class="badge">Ranked</span>{% endif %}
+    </div>
+    <div class="actions">
+      <a class="button secondary" href="{% url 'games:detail' game.slug %}">View Rules</a>
+      {% if game.is_playable %}
+        <a class="button" href="{% url 'games:detail' game.slug %}#create-lobby">Create Lobby</a>
+      {% endif %}
+    </div>
+  </div>
+</article>

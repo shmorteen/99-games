@@ -7,16 +7,26 @@ its engine, interface, rules, spectator view, overlay, and tests are complete.
 
 | Game | Status | Notes |
 | --- | --- | --- |
-| Connect4 | Planned | First implementation target after platform foundation. |
-| Hangman | Planned | Requires private answer state and public progress state. |
-| Werewolves vs Villagers | Planned | Requires hidden roles, phases, voting, and spectator safety. |
+| Connect4 | Seeded, not playable | Catalog metadata exists; engine and UI are deferred. |
+| Hangman | Seeded, not playable | Catalog metadata exists; private answer handling is deferred. |
+| Werewolves vs Villagers | Seeded, not playable | Catalog metadata exists; hidden-role engine work is deferred. |
+
+## Initial Categories
+
+| Category | Slug | Status |
+| --- | --- | --- |
+| Board Games | `board-games` | Seeded |
+| Word Games | `word-games` | Seeded |
+| Deduction Games | `deduction-games` | Seeded |
+| Trivia Games | `trivia-games` | Seeded |
+| Party Games | `party-games` | Seeded |
 
 ## Future Catalog Requirements
 
-Each game definition should include:
+Each game definition includes:
 
 - Stable slug and display name.
-- Category and tags.
+- Category.
 - Minimum and maximum players.
 - Supported spectator mode.
 - Bot support status.
@@ -24,6 +34,20 @@ Each game definition should include:
 - Rules page.
 - Engine registration key.
 - Playable, beta, disabled, or planned status.
+
+Playable actions, lobby creation, game engines, and realtime gameplay are
+deferred to later tasks.
+
+## Public Pages
+
+The current public catalog routes are:
+
+- `/games/`
+- `/games/<slug>/`
+- `/games/categories/<slug>/`
+
+Only active games in active categories appear publicly. Unimplemented games are
+shown as `Coming Soon` and do not expose lobby creation actions.
 
 ## Readiness Checklist
 
