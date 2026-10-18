@@ -1,0 +1,53 @@
+{% extends base_template %}
+{% load static %}
+
+{% block extra_head %}
+  <link rel="stylesheet" href="{% static 'play/connect4.css' %}">
+  <link rel="stylesheet" href="{% static 'play/connect4_spectator.css' %}">
+{% endblock %}
+
+{% block content %}
+  <div id="connect4-viewer" class="connect4-app connect4-viewer{% if is_overlay %} connect4-viewer-overlay{% endif %}"
+       data-ws-path="/ws/games/{{ session.public_id }}/{{ websocket_query|default:'' }}">
+    {% if not is_overlay %}
+      <header class="connect4-header">
+        <div>
+          <p class="connect4-eyebrow">Live match · Spectator view</p>
+          <h1>Watch Connect4.</h1>
+          <p class="connect4-lede">Follow every move live.</p>
+        </div>
+        <a class="connect4-back" href="{% url 'games:catalog' %}">← Game catalog</a>
+      </header>
+    {% endif %}
+    <section class="connect4-panel" aria-label="Connect4 spectator board">
+      <div class="connect4-board-head">
+        <div>
+          <p class="connect4-kicker">{% if is_overlay %}Connect4 live{% else %}Match board{% endif %}</p>
+          <h2 id="connect4-status" aria-live="polite">{{ status_text }}</h2>
+        </div>
+        <span id="connect4-connection" class="connect4-connection" role="status">Connecting…</span>
+      </div>
+      <div class="connect4-board-frame">
+        <table class="connect4-board" aria-label="Connect4 board">
+          <caption class="connect4-sr-only">Six rows and seven columns, read from top to bottom.</caption>
+          <tbody id="connect4-board">
+            {% for row in board_rows %}
+              <tr>{% for cell in row %}
+                <td class="connect4-cell connect4-cell-{{ cell|default:'empty' }}"
+                    aria-label="Row {{ forloop.parentloop.counter }}, column {{ forloop.counter }}: {{ cell|default:'empty' }}">
+                  <span class="connect4-disc" aria-hidden="true">{% if cell == 'red' %}R{% elif cell == 'yellow' %}Y{% endif %}</span>
+                </td>
+              {% endfor %}</tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <p class="connect4-version">Move <span id="connect4-move-count">{{ snapshot.state.move_count }}</span> of 42</p>
+      <p id="connect4-message" class="connect4-message" role="alert"></p>
+      <noscript><p class="connect4-alert">Enable JavaScript for live updates.</p></noscript>
+    </section>
+  </div>
+  {{ snapshot|json_script:"connect4-viewer-bootstrap" }}
+{% endblock %}
+
+{% block extra_scripts %}<script src="{% static 'play/connect4_spectator.js' %}" defer></script>{% endblock %}

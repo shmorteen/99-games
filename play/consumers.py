@@ -1,6 +1,6 @@
 """Session-scoped game WebSocket messages."""
 
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 from uuid import UUID
 
 from channels.db import database_sync_to_async
@@ -9,9 +9,12 @@ from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from django.conf import settings
 from django.utils import timezone
 
+from games.connect4_state import serialize_state
 from games.engine import GameEngineError
+from .overlays import get_overlay_snapshot
 from .services import (
     GameActionError,
+    GameActionDenied,
     GameActionInvalid,
     get_game_snapshot,
     submit_game_action,
@@ -23,11 +26,18 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
         self.session_uuid = str(self.scope["url_route"]["kwargs"]["session_uuid"])
         self.group_name = f"game_{self.session_uuid.replace('-', '')}"
         self.user = self.scope.get("user")
+        query = parse_qs(
+            self.scope.get("query_string", b"").decode("ascii", errors="ignore")
+        )
+        self.overlay_token = query.get("overlay_token", [None])[0]
         if not self._origin_is_allowed():
             raise DenyConnection("WebSocket origin is not allowed.")
         try:
             snapshot = await self._snapshot()
         except GameActionError as error:
+            if self.overlay_token is not None:
+                await self.close(code=4403)
+                return
             raise DenyConnection(str(error)) from error
         await self.channel_layer.group_add(self.group_name, self.channel_name)
         await self.accept()
@@ -54,6 +64,8 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
                 snapshot = await self._snapshot()
                 await self.send_event("GAME_SNAPSHOT", snapshot, request_id=request_id)
                 return
+            if self.overlay_token is not None:
+                raise GameActionDenied("Overlay connections are read-only.")
             if not isinstance(request_id, str):
                 raise GameActionInvalid("request_id must be a UUID.")
             UUID(request_id)
@@ -97,6 +109,11 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
         )
 
     def _audience_payload(self, response, audience):
+        if audience == "spectator" and response["state"].get("game") == "connect4":
+            return {
+                "state_version": response["state_version"],
+                "state": serialize_state(response["spectator_state"]),
+            }
         return {
             "state_version": response["state_version"],
             "state": (
@@ -131,6 +148,10 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
 
     @database_sync_to_async
     def _snapshot(self):
+        if self.overlay_token is not None:
+            return get_overlay_snapshot(
+                session_uuid=self.session_uuid, token=self.overlay_token
+            )
         return get_game_snapshot(session_uuid=self.session_uuid, user=self.user)
 
     @database_sync_to_async

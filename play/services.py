@@ -11,7 +11,8 @@ from uuid import UUID
 from django.db import transaction
 from django.utils import timezone
 
-from games.engine import StaleGameState
+from games.connect4_state import serialize_state
+from games.engine import GameEngineError, StaleGameState
 from lobbies.models import LobbyBan, LobbyStatus, MembershipRole, PLAYER_SEAT_ROLES
 from .action_rules import ACTION_RULES
 from .locks import GameActionLockUnavailable, acquire_game_action_lock
@@ -197,13 +198,19 @@ def get_game_snapshot(*, session_uuid: str, user) -> dict:
         or not session.lobby.allow_spectators
     ):
         raise GameActionDenied("Game connection is not allowed.")
+    state = session.public_state if is_player else session.spectator_state
+    if not is_player and session.engine_key == "connect4":
+        try:
+            state = serialize_state(state)
+        except GameEngineError as error:
+            raise GameActionDenied("Game state is unavailable.") from error
     return {
         "session_uuid": str(session.public_id),
         "state_version": session.state_version,
         "status": session.status,
         "audience": "player" if is_player else "spectator",
         "actor_id": participant.actor_id if is_player else None,
-        "state": session.public_state if is_player else session.spectator_state,
+        "state": state,
         "private_state": participant.private_state if is_player else None,
     }
 

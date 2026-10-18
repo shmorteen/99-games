@@ -1,7 +1,7 @@
 from django.urls import path
 
 from . import views
-from play.views import connect4_player
+from play.views import connect4_overlay, connect4_player, connect4_spectator
 
 
 app_name = "games"
@@ -13,6 +13,10 @@ urlpatterns = [
         connect4_player,
         name="connect4_player",
     ),
+    path("connect4/sessions/<uuid:session_uuid>/spectate/", connect4_spectator,
+         name="connect4_spectator"),
+    path("connect4/sessions/<uuid:session_uuid>/overlay/", connect4_overlay,
+         name="connect4_overlay"),
     path("categories/<slug:slug>/", views.game_category_detail, name="category"),
     path("<slug:slug>/", views.game_detail, name="detail"),
 ]

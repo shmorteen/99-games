@@ -31,6 +31,6 @@
 - [x] KSA-023 Add win and draw detection
 - [x] KSA-024 Add Connect4 WebSocket actions
 - [x] KSA-025 Add Connect4 player interface
-- [ ] KSA-026 Add spectator and overlay views
+- [x] KSA-026 Add spectator and overlay views
 - [ ] KSA-027 Add Connect4 bots
 - [ ] KSA-028 Add replay and results

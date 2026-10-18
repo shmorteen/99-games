@@ -72,6 +72,7 @@
             <span>Yellow {% if player_marker == 'yellow' %}<strong>· You</strong>{% else %}· Opponent{% endif %}</span>
           </div>
           <p class="connect4-version">Move <span id="connect4-move-count">{{ snapshot.state.move_count }}</span> of 42</p>
+          {% if overlay_url %}<p class="connect4-version"><a href="{{ overlay_url }}">Open OBS overlay</a> · Copy this link into an OBS browser source. It expires after 24 hours.</p>{% endif %}
         </section>
         <section class="connect4-info-card">
           <h2>How to win</h2>

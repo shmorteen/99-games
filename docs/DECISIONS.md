@@ -188,3 +188,16 @@ Reasoning:
   is sent only through per-user WebSocket groups.
 - Ready-check timeout policy is intentionally explicit and currently limited to
   returning the lobby to waiting until richer kick/fill policies are designed.
+
+## ADR-014: Issue Read-Only Connect4 OBS Links to Lobby Hosts
+
+Status: Accepted
+
+The current lobby host receives a signed, 24-hour, session-bound overlay URL on
+their Connect4 player page. OBS can load it without sharing account cookies.
+HTTP and WebSocket overlay reads verify the signature, session, current active
+host, and ban status. A host transfer invalidates existing links. Overlay
+connections receive only the validated spectator state and cannot submit game
+actions. Responses disable caching and referrer forwarding. The host may reload
+the player page to issue a fresh link after expiry. A copied URL is a bearer
+credential and must be kept private by the host.

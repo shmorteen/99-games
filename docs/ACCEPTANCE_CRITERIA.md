@@ -977,3 +977,28 @@ Complete when:
    spectator, overlay, engine, and other required work is complete.
 9. Django checks, migration checks, migrations on a disposable database,
    Python tests, and configured frontend checks pass.
+
+## KSA-026 — Add Connect4 Spectator and Overlay Views
+
+Complete when:
+
+1. An authenticated, current spectator can open a read-only Connect4 page for
+   an existing matching session. Players, outsiders, disabled spectators, and
+   anonymous visitors cannot use that page.
+2. The first render and WebSocket updates use the validated spectator state,
+   show the board, turn, move count, and terminal result, and omit private and
+   unknown state fields. Neither page contains move controls.
+3. The active lobby host can copy a signed OBS browser-source URL from the
+   player page. Other players and spectators do not receive that URL.
+4. The OBS URL works without a login cookie, expires after 24 hours, and stops
+   working if the host changes or becomes inactive or banned. It grants only
+   Connect4 spectator snapshots and read-only live WebSocket updates.
+5. The overlay uses a transparent page background. Both viewers reconnect to
+   the shared game WebSocket, accept authoritative snapshots and state updates,
+   and label cells and status in text.
+6. HTTP and WebSocket tests cover authorized and denied access, token scope and
+   expiry, state isolation, live updates, resync, and action rejection.
+7. Connect4 remains not playable in the catalog until its remaining engine,
+   bot, replay, rules, and integration requirements are complete.
+8. Django checks, migration checks, migrations, tests, and applicable frontend
+   checks pass.
