@@ -3,10 +3,12 @@ from channels.auth import AuthMiddlewareStack
 from channels.routing import ProtocolTypeRouter, URLRouter
 
 from lobbies.routing import websocket_urlpatterns as lobby_websocket_urlpatterns
+from play.routing import websocket_urlpatterns as game_websocket_urlpatterns
 
 
 websocket_urlpatterns = [
     *lobby_websocket_urlpatterns,
+    *game_websocket_urlpatterns,
 ]
 
 

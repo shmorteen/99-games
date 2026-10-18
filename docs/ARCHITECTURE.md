@@ -218,6 +218,23 @@ unready users or filling seats with bots remain later policy work.
 
 ## Realtime Flow
 
+The `play` app now owns a shared session action service and `/ws/games/<uuid>/`
+consumer. The service reads the durable `authoritative_state` on a locked
+`GameSession` row, checks actor membership and the expected state version, and
+applies versioned pure action rules. A Redis session lock surrounds the
+transaction. Each successful action writes new authoritative, public, and
+spectator states plus a versioned, uniquely keyed action receipt. Repeating a
+request UUID with the same content returns the receipt; reusing it with other
+content fails. The consumer broadcasts after the transaction commits and
+rechecks each viewer before sending role-appropriate state. Reconnect and
+resync read a fresh database snapshot.
+Clients use `state_version` to ignore older deliveries and can resync after a
+missed broadcast; a durable outbound event queue is not part of this task.
+
+Connect4 `0.1` is the first action-rule registration. Its seeded catalog entry
+remains unplayable, so this route can act on an existing session but does not
+enable production lobby start for Connect4 yet.
+
 1. A client sends a game or lobby action over HTTP or WebSocket.
 2. The server authenticates the user and authorizes the action.
 3. The relevant service validates the action against current authoritative state.

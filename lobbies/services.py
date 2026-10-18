@@ -556,6 +556,7 @@ def _start_game_with_lock(
             engine_version=locked_lobby.game.engine_version,
             configuration=dict(locked_lobby.game_configuration),
             initial_state=initial_state,
+            authoritative_state=initial_state,
             public_state=public_state,
             spectator_state=spectator_state,
             state_version=1,

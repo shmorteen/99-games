@@ -919,3 +919,32 @@ Complete when:
    transport, interface, spectator, bot, and replay work remain later tasks.
 8. Django checks, migration checks, migrations on a disposable database, and
    pytest pass.
+
+## KSA-024 — Add Connect4 WebSocket Actions
+
+Complete when:
+
+1. A session-scoped WebSocket route accepts authenticated current players and
+   permitted session spectators, and rejects outsiders, inactive users, and
+   disallowed origins.
+2. `GAME_ACTION` carries a UUID request ID, server-validated action, and
+   expected state version. The consumer delegates every mutation to the shared
+   game-action service and broadcasts only after it commits.
+3. The service derives the actor from a current session participant (or a
+   server-owned bot actor), checks session and lobby status, and applies
+   versioned Connect4 rules to authoritative state.
+4. A Redis action lock and database row lock serialize actions. Stale versions
+   and reused request IDs with different content are rejected. A same-key retry
+   returns its durable response without applying or broadcasting another move.
+5. The accepted action atomically updates authoritative, public, and spectator
+   state, increments the session version, and persists an action receipt.
+   A terminal action completes the session and lobby.
+6. Connect and `GAME_RESYNC` provide role-scoped snapshots. Broadcasts expose
+   only the public or spectator state for each viewer.
+7. Tests cover service success, invalid and unauthorized actions, stale state,
+   idempotency, lock failure, bot service use, terminal completion, WebSocket
+   delivery, spectator rejection, and reconnect state.
+8. Connect4 remains unplayable in the catalog until the remaining player and
+   spectator interfaces, overlay, and other engine requirements are complete.
+9. Django checks, migration checks, migrations on a disposable database, and
+   pytest pass.

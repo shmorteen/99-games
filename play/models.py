@@ -44,6 +44,7 @@ class GameSession(models.Model):
     engine_version = models.CharField(max_length=ENGINE_VERSION_MAX_LENGTH)
     configuration = models.JSONField(default=dict)
     initial_state = models.JSONField(default=dict)
+    authoritative_state = models.JSONField(default=dict)
     public_state = models.JSONField(default=dict)
     spectator_state = models.JSONField(default=dict)
     state_version = models.PositiveIntegerField(default=1)
@@ -67,6 +68,7 @@ class GameSession(models.Model):
         for field_name in (
             "configuration",
             "initial_state",
+            "authoritative_state",
             "public_state",
             "spectator_state",
         ):
@@ -148,7 +150,30 @@ class GameSessionParticipant(models.Model):
         super().save(*args, **kwargs)
 
 
+class GameActionReceipt(models.Model):
+    """Durable idempotency response for one accepted session action."""
+
+    public_id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    session = models.ForeignKey(
+        GameSession, on_delete=models.CASCADE, related_name="action_receipts"
+    )
+    participant = models.ForeignKey(GameSessionParticipant, on_delete=models.PROTECT)
+    idempotency_key = models.UUIDField()
+    request_hash = models.CharField(max_length=64)
+    response = models.JSONField(default=dict)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=("session", "participant", "idempotency_key"),
+                name="unique_session_action_receipt",
+            ),
+        ]
+
+
 __all__ = [
+    "GameActionReceipt",
     "GameSession",
     "GameSessionParticipant",
     "GameSessionStatus",

@@ -120,6 +120,16 @@ event. Terminal states have no legal actions and reject further drops. The
 state serializer derives the result from the board, rejecting forged results,
 unfinished winning positions, and impossible winner parity.
 
+KSA-024 routes `GAME_ACTION` through `play.services.submit_game_action`. It
+persists Connect4's full JSON state in `GameSession.authoritative_state`,
+derives player and spectator snapshots through versioned action rules, and
+stores a UUID-keyed receipt for idempotent retries. The game WebSocket route is
+`/ws/games/<session_uuid>/`. `GAME_SNAPSHOT` serves connect and `GAME_RESYNC`;
+`GAME_STATE` broadcasts a committed action; `GAME_ACTION_ACK` answers a retry;
+`ERROR` carries domain error codes. Messages include `request_id`,
+`server_timestamp`, `session_uuid`, and `payload`. Client `GAME_ACTION` payloads
+contain only `action` and `state_version`.
+
 Connect4 remains unregistered and `is_playable=False` until the remaining
 engine, action transport, interface, spectator, overlay, bot, and result
 persistence work is complete.

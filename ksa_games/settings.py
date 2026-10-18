@@ -57,6 +57,13 @@ KSA_LOBBY_START_LOCK_REDIS_URL = os.environ.get(
     "KSA_LOBBY_START_LOCK_REDIS_URL",
     os.environ.get("KSA_REDIS_URL", "redis://localhost:6379/0"),
 ).strip()
+KSA_GAME_ACTION_LOCK_BACKEND = os.environ.get(
+    "KSA_GAME_ACTION_LOCK_BACKEND", "redis"
+).strip()
+KSA_GAME_ACTION_LOCK_REDIS_URL = os.environ.get(
+    "KSA_GAME_ACTION_LOCK_REDIS_URL",
+    os.environ.get("KSA_REDIS_URL", "redis://localhost:6379/0"),
+).strip()
 KSA_LOBBY_START_LOCK_PREFIX = os.environ.get(
     "KSA_LOBBY_START_LOCK_PREFIX",
     "ksa-games",
