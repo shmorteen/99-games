@@ -85,6 +85,24 @@ All human and bot actions must use the same service path:
 - Spectator state must never include hidden information.
 - OBS overlays must use spectator-safe data.
 
+## Connect4 State Foundation (KSA-021)
+
+`games.connect4_state` is a pure state module, not a registered game engine.
+It accepts only the seeded standard configuration: six rows, seven columns,
+and four discs in a line. It receives two server-supplied membership actor
+UUIDs with seats one and two. Seat one is red and takes the first turn; seat
+two is yellow. Input order does not assign turns.
+
+The JSON state has `schema_version: "connect4.state.v1"`, `game`, `status`,
+`rows`, `columns`, `connect_length`, `board`, `players`, `turn_actor_id`, and
+`move_count`. Board row zero is the top row and row five is the bottom row;
+empty cells are `null`. `serialize_state` returns detached public data and
+omits any extra fields. It checks structural shape and turn/count parity but
+does not decide whether a column drop is legal or whether a win occurred.
+
+Connect4 remains unregistered and `is_playable=False` until the remaining
+engine, action, interface, spectator, overlay, bot, and result work is complete.
+
 ## Test Expectations
 
 Each engine requires tests for:

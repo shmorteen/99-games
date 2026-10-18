@@ -851,3 +851,25 @@ READY_CHECK → STARTING → ACTIVE
 * ready-check timeout;
 * bot-ready behavior;
 * correct lobby status transitions.
+
+## KSA-021 — Add Connect4 State Representation
+
+Complete when:
+
+1. A pure Connect4 state module creates the standard 6-row, 7-column board
+   with four-in-a-row configuration and rejects unsupported settings.
+2. Initial state requires exactly two distinct UUID actor IDs in seats one and
+   two. Input order does not change marker or turn assignment.
+3. State records schema version, game key, status, dimensions, board, player
+   markers, current actor, and move count as strict JSON values.
+4. Board rows and serialized results are detached copies, and caller-provided
+   actor records are not modified.
+5. Serialization validates the state shape, actor and marker mapping, board
+   cells, disc counts, and turn parity. It omits unknown or private fields.
+6. Tests cover valid and invalid configuration, actor records, state shape,
+   serialization, and a structurally valid next-turn state.
+7. No engine is registered and the seeded Connect4 definition remains
+   unplayable. Move legality, win/draw detection, and action transport remain
+   later tasks.
+8. Django checks, migration checks, migrations on a disposable database, and
+   pytest pass.

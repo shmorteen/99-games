@@ -26,7 +26,7 @@
 
 # Current milestone: Connect4
 
-- [ ] KSA-021 Add Connect4 state representation
+- [x] KSA-021 Add Connect4 state representation
 - [ ] KSA-022 Add legal move validation
 - [ ] KSA-023 Add win and draw detection
 - [ ] KSA-024 Add Connect4 WebSocket actions

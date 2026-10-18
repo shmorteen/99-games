@@ -7,7 +7,7 @@ its engine, interface, rules, spectator view, overlay, and tests are complete.
 
 | Game | Status | Notes |
 | --- | --- | --- |
-| Connect4 | Seeded, not playable | Catalog metadata exists; engine and UI are deferred. |
+| Connect4 | Seeded, not playable | Validated state shape exists; engine, actions, and UI are deferred. |
 | Hangman | Seeded, not playable | Catalog metadata exists; private answer handling is deferred. |
 | Werewolves vs Villagers | Seeded, not playable | Catalog metadata exists; hidden-role engine work is deferred. |
 
