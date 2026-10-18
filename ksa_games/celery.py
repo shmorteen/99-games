@@ -10,6 +10,6 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ksa_games.settings")
 
 app = Celery("ksa_games")
 app.config_from_object("django.conf:settings", namespace="CELERY")
-app.conf.imports = ("ksa_games.tasks",)
+app.conf.imports = ("ksa_games.tasks", "play.tasks")
 
 celery_app = app

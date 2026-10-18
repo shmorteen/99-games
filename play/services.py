@@ -163,6 +163,9 @@ def submit_game_action(
                     request_hash=request_hash,
                     response=response,
                 )
+                from .bots import maybe_schedule_connect4_bot_turn
+
+                maybe_schedule_connect4_bot_turn(session, authoritative_state)
                 return ActionOutcome(response=response, replayed=False)
     except GameActionLockUnavailable as error:
         raise GameActionConflict("Game action lock is unavailable.") from error

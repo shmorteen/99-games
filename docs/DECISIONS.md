@@ -201,3 +201,16 @@ connections receive only the validated spectator state and cannot submit game
 actions. Responses disable caching and referrer forwarding. The host may reload
 the player page to issue a fresh link after expiry. A copied URL is a bearer
 credential and must be kept private by the host.
+
+## ADR-015: Run Connect4 Bots Through Versioned Shared Actions
+
+Status: Accepted
+
+The seeded `casual` bot strategy is deterministic and reads the authoritative
+board. A Celery task receives only a session UUID and expected version, then
+derives the current actor from PostgreSQL and submits its chosen move through
+`submit_game_action`. The service's Redis lock, database transaction, state
+version, and idempotency receipt handle concurrent or repeated jobs. Enqueueing
+occurs on transaction commit after session start and accepted actions. The
+worker publishes the committed result to the common game channel. Queue
+delivery is best effort until a durable outbox or reconciliation task is added.

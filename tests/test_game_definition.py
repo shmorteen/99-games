@@ -87,6 +87,8 @@ def test_initial_game_definitions_are_seeded_as_unplayable_catalog_entries():
         assert game.is_playable is False
         assert game.engine_key
         assert game.engine_version
+    assert games["connect4"].supports_bots is True
+    assert games["connect4"].difficulty_options == ["casual"]
 
 
 def test_game_definition_creation_normalizes_name_and_slug():

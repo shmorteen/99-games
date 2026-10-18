@@ -585,6 +585,10 @@ def _start_game_with_lock(
                 "engine_version": session.engine_version,
             },
         )
+        if session.engine_key == "connect4":
+            from play.bots import maybe_schedule_connect4_bot_turn
+
+            maybe_schedule_connect4_bot_turn(session, initial_state)
         return GameStartResult(
             session=session,
             public_state=public_state,

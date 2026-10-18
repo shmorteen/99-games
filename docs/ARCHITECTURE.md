@@ -242,6 +242,18 @@ client submits versioned moves through the session WebSocket and paints only
 confirmed snapshots. Reconnect uses the same idempotency UUID for an unresolved
 action. No game result or turn decision is accepted from the browser.
 
+Connect4 bot turns use a pure deterministic `casual` strategy. Session start
+and committed game actions enqueue a version-bound Celery job when the current
+actor is a bot. The worker reloads PostgreSQL state, checks the current bot
+membership and version, then calls the same transactional action service as a
+human player. A UUID derived from session, actor, and version makes duplicate
+jobs idempotent. The worker broadcasts through the existing game group, whose
+consumer applies player and spectator audience filtering. Test settings disable
+automatic queue publishing; tests explicitly enable and mock it where needed.
+Broker publish failures are logged after commit; a durable outbox or automatic
+reconciliation of missed bot jobs is still needed for recovery from a broker
+outage. Connect4 remains unplayable in the catalog.
+
 1. A client sends a game or lobby action over HTTP or WebSocket.
 2. The server authenticates the user and authorizes the action.
 3. The relevant service validates the action against current authoritative state.

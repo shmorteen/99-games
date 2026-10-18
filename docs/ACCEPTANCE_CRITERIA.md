@@ -1002,3 +1002,28 @@ Complete when:
    bot, replay, rules, and integration requirements are complete.
 8. Django checks, migration checks, migrations, tests, and applicable frontend
    checks pass.
+
+## KSA-027 — Add Connect4 Bots
+
+Complete when:
+
+1. A pure, deterministic Connect4 strategy selects a legal action for the
+   current bot actor using the seeded `casual` difficulty. It takes an immediate
+   win, blocks an immediate loss, and otherwise prefers a safe central column.
+2. The strategy rejects unsupported difficulty, out-of-turn and completed
+   states and never selects a full column.
+3. Existing Connect4 sessions queue a bot turn after a committed human or bot
+   move, or after session start when a bot acts first. The queued job carries
+   only session UUID and expected state version; it reads actor and state from
+   PostgreSQL when executed.
+4. The worker submits through the same `submit_game_action` service used by
+   humans, with a deterministic idempotency UUID for that actor and version.
+   Stale, missing, non-bot, inactive, and completed turns do not persist moves.
+5. Accepted bot moves broadcast on the shared game channel. Player and
+   spectator viewers receive their existing audience-specific payloads.
+6. Tests cover strategy choices and failures, commit-time scheduling, worker
+   persistence and replay safety, task registration, and live WebSocket fanout.
+7. Connect4 stays unplayable in the catalog until replay/results and other
+   required engine and product work are complete. Its seeded metadata declares
+   bot support with the existing `casual` difficulty.
+8. Django checks, migration checks, migrations, and the full Python suite pass.
