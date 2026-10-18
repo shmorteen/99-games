@@ -227,3 +227,17 @@ original action hash, pure rules, and final session state. View responses contai
 only validated, spectator-safe frames. Missing or inconsistent receipts make
 both result and replay unavailable, so a stored terminal result cannot conceal an
 incomplete history.
+
+## ADR-017: Keep Werewolves Ballots Secret Until Resolution
+
+Status: Accepted
+
+The version `0.1` Werewolves vs Villagers engine starts at night, assigns roles
+with server randomness, and stores roles and ballots only in authoritative
+state. Public phase state gives a ballot count without voters or targets. Vote
+events also omit the voter, because a night voter would identify a wolf. A
+unique plurality eliminates its target at full participation or timeout; tied
+and empty ballots eliminate nobody. A twenty-round cap gives an unattended or
+persistently tied game a deterministic draw. The engine validates phase
+durations but does not schedule timers or persist transitions; those belong to
+the shared service integration.

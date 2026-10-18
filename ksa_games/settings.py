@@ -39,7 +39,7 @@ INSTALLED_APPS: list[str] = [
     "lobbies",
     "play",
 ]
-KSA_GAME_ENGINE_MODULES = env_list("KSA_GAME_ENGINE_MODULES", ["games.hangman"])
+KSA_GAME_ENGINE_MODULES = env_list("KSA_GAME_ENGINE_MODULES", ["games.hangman", "games.werewolves"])
 KSA_ALLOW_GUEST_SPECTATOR_WEBSOCKETS = env_bool(
     "KSA_ALLOW_GUEST_SPECTATOR_WEBSOCKETS",
     False,

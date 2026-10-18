@@ -63,8 +63,8 @@ Startup imports the module paths in `KSA_GAME_ENGINE_MODULES` and calls
 `register_engines(registry)` when a module provides it. Duplicate key/version
 registrations and invalid versions are rejected and surfaced through Django
 system checks. Playable catalog entries must reference a registered engine, but
-Hangman is registered at version `0.1`. Connect4 and Werewolves vs Villagers
-remain unregistered until their actual engine classes exist.
+Hangman and Werewolves vs Villagers are registered at version `0.1`. Connect4
+remains unregistered until its engine class exists.
 
 ## Action Handling
 
@@ -164,6 +164,27 @@ integration exist. KSA-030 routes its guesses through the shared transactional
 game-action service and renders player, spectator, rules, and signed overlay
 pages for existing sessions. Player and spectator snapshots are derived from
 authoritative state before delivery; no active view receives the answer.
+
+## Werewolves vs Villagers Engine (KSA-031)
+
+`games.werewolves.WerewolvesEngine` is registered at version `0.1` for five to
+twenty seated player UUIDs. Initial role selection is server-owned: a quarter
+of players (rounded down, minimum one) are werewolves. Night starts first.
+Living wolves vote at night; all living players vote by day. Each actor has
+one private ballot per phase and cannot vote for themselves. A phase resolves
+when all eligible ballots arrive or a server-triggered timeout occurs. A unique
+plurality eliminates its target; ties and empty ballots eliminate nobody.
+Eliminating the final wolf wins for villagers; wolves win when living wolves
+equal or outnumber living villagers. If neither team wins by the end of day
+twenty, the game is a draw.
+
+Public and spectator state expose seats, life status, phase, vote count, and
+elimination results, but no live roles or ballots. Private state contains only
+the requesting actor's role, own vote, and legal actions. Vote events omit both
+voter and target, so a night action cannot identify a wolf. Completed state
+reveals roles and the server-derived result. Phase durations are validated and
+stored, but scheduling timers and persisting actions are service work for a
+later task. No bot support is declared.
 
 ## Test Expectations
 

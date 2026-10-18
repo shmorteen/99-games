@@ -1087,3 +1087,22 @@ Complete when:
 6. HTTP, service, WebSocket, and browser behavior tests cover success, denial,
    live updates, completion, and hidden-state isolation. Hangman remains
    unplayable until normal lobby start and full product integration are done.
+
+## KSA-031 — Add Werewolves vs Villagers Engine
+
+Complete when:
+
+1. A registered version `0.1` engine creates server-assigned roles for five to
+   twenty uniquely seated actors and validates day and night durations.
+2. Night wolf votes and day votes validate actor, target, phase, state version,
+   and one ballot per actor. All eligible ballots or a server timeout
+   resolves a phase; a tied or empty tally eliminates nobody.
+3. Villagers win when no wolves live, wolves win at parity, and unresolved play
+   ends in a draw after day twenty. Results derive from authoritative state.
+4. Active public and spectator state and transition events reveal no roles,
+   voter identities, or ballot targets. Actor-private state contains only the
+   requesting player's role and ballot. Completed state may reveal roles.
+5. Tests cover both team wins, draw, timeout, tied votes, invalid actions,
+   malformed state, role separation, and no bot support.
+6. The game stays unplayable until shared action transport, timers, and the
+   KSA-032 interfaces are complete. Django and Python checks pass.
