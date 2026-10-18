@@ -1,0 +1,43 @@
+{% extends base_template %}
+{% load static %}
+
+{% block extra_head %}<link rel="stylesheet" href="{% static 'play/hangman.css' %}">{% endblock %}
+
+{% block content %}
+<main id="hangman-app" class="hangman{% if is_overlay %} hangman-overlay{% endif %}"
+      data-ws-path="/ws/games/{{ session.public_id }}/{{ websocket_query }}"
+      data-player="{% if is_player %}true{% else %}false{% endif %}">
+  {% if not is_overlay %}
+  <header class="hangman-header">
+    <div><p class="hangman-eyebrow">{% if is_player %}Your live match{% else %}Live spectator view{% endif %}</p>
+      <h1>Hangman</h1><p>Find the hidden word before the attempts run out.</p></div>
+    <nav aria-label="Hangman navigation"><a href="{% url 'games:hangman_rules' %}">How to play</a><a href="{% url 'games:catalog' %}">Game catalog</a></nav>
+  </header>
+  {% endif %}
+  <div class="hangman-layout">
+    <section class="hangman-card" aria-label="Hangman word">
+      <div class="hangman-card-head"><span>THE WORD</span><span id="hangman-connection" role="status">Connecting…</span></div>
+      <p id="hangman-mask" class="hangman-mask" aria-label="Word pattern">{{ snapshot.state.mask }}</p>
+      <p id="hangman-status" aria-live="polite">{{ status_text }}</p>
+      <p id="hangman-message" role="alert"></p>
+      <div class="hangman-attempts"><span>Wrong guesses</span><strong><span id="hangman-wrong">{{ snapshot.state.wrong_guesses }}</span> / {{ snapshot.state.max_wrong_guesses }}</strong></div>
+      <p class="hangman-guessed">Letters tried: <span id="hangman-guessed">{% for letter in snapshot.state.guessed_letters %}{{ letter }} {% empty %}None yet{% endfor %}</span></p>
+      <p id="hangman-answer" class="hangman-answer"{% if snapshot.state.status != 'completed' %} hidden{% endif %}>Answer: <strong>{{ snapshot.state.answer }}</strong></p>
+    </section>
+    {% if is_player %}
+    <section class="hangman-card" aria-label="Guess a letter">
+      <div class="hangman-card-head"><span>YOUR MOVE</span><span>One letter at a time</span></div>
+      <div class="hangman-letters" role="group" aria-label="Choose a letter">
+        {% for letter in letters %}<button type="button" data-letter="{{ letter.value }}" aria-label="Guess {{ letter.value }}" disabled>{{ letter.value }}</button>{% endfor %}
+      </div>
+      <p class="hangman-hint">The board updates only after the server confirms a guess.</p>
+      {% if overlay_url %}<p class="hangman-hint"><a href="{{ overlay_url }}">OBS overlay link</a> · Valid for 24 hours.</p>{% endif %}
+    </section>
+    {% endif %}
+  </div>
+  <noscript><p>Enable JavaScript to receive live updates{% if is_player %} and guess letters{% endif %}.</p></noscript>
+</main>
+{{ snapshot|json_script:"hangman-bootstrap" }}
+{% endblock %}
+
+{% block extra_scripts %}<script src="{% static 'play/hangman.js' %}" defer></script>{% endblock %}

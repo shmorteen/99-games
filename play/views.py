@@ -10,6 +10,7 @@ from django.urls import reverse
 from games.connect4_moves import legal_actions
 from games.connect4_state import serialize_state
 from games.engine import GameEngineError
+from games.hangman import HangmanEngine
 from .models import GameSession
 from .services import GameActionError, get_game_snapshot
 from .overlays import get_overlay_snapshot, issue_overlay_token
@@ -184,3 +185,99 @@ def connect4_replay(request, session_uuid):
     })
     response["Cache-Control"] = "no-store"
     return response
+
+
+def _hangman_session(session_uuid):
+    return get_object_or_404(
+        GameSession.objects.select_related("game", "lobby"),
+        public_id=session_uuid, game__slug="hangman",
+        engine_key="hangman", engine_version="0.1",
+    )
+
+
+def _hangman_page(request, session, snapshot, *, audience, overlay=False, token=""):
+    engine = HangmanEngine()
+    state = (engine.get_public_state if audience == "player" else engine.get_spectator_state)(
+        session.authoritative_state
+    )
+    actor_id = snapshot.get("actor_id") if audience == "player" else None
+    bootstrap = {
+        "session_uuid": str(session.public_id),
+        "state_version": snapshot["state_version"],
+        "actor_id": actor_id,
+        "state": state,
+    }
+    guessed = set(state["guessed_letters"])
+    legal = {
+        action["letter"] for action in engine.legal_actions(session.authoritative_state, actor_id)
+    } if actor_id else set()
+    letters = [
+        {"value": chr(code), "guessed": chr(code) in guessed, "enabled": chr(code) in legal}
+        for code in range(ord("A"), ord("Z") + 1)
+    ]
+    if state["status"] == "completed":
+        status_text = "Word solved!" if state["result"]["outcome"] == "win" else "No attempts left."
+    elif actor_id is None:
+        status_text = "Players are guessing."
+    elif state["turn_actor_id"] == actor_id:
+        status_text = "Your turn. Choose a letter."
+    else:
+        status_text = "Waiting for another player."
+    context = {
+        "page_title": "Hangman overlay" if overlay else "Hangman match",
+        "base_template": "play/overlay_base.html" if overlay else "games/base.html",
+        "session": session, "snapshot": bootstrap, "letters": letters,
+        "status_text": status_text, "is_player": audience == "player",
+        "is_overlay": overlay,
+        "websocket_query": "?" + urlencode({"overlay_token": token}) if overlay else "",
+        "overlay_url": None,
+    }
+    if audience == "player" and session.lobby.host_id == request.user.pk:
+        path = reverse("games:hangman_overlay", args=[session.public_id])
+        context["overlay_url"] = request.build_absolute_uri(
+            path + "?" + urlencode({"token": issue_overlay_token(session)})
+        )
+    response = render(request, "play/hangman.html", context)
+    response["Cache-Control"] = "no-store"
+    response["Referrer-Policy"] = "no-referrer"
+    return response
+
+
+@login_required
+def hangman_player(request, session_uuid):
+    session = _hangman_session(session_uuid)
+    try:
+        snapshot = get_game_snapshot(session_uuid=str(session.public_id), user=request.user)
+        if snapshot["audience"] != "player":
+            raise Http404
+        return _hangman_page(request, session, snapshot, audience="player")
+    except (GameActionError, GameEngineError) as error:
+        raise Http404 from error
+
+
+@login_required
+def hangman_spectator(request, session_uuid):
+    session = _hangman_session(session_uuid)
+    try:
+        snapshot = get_game_snapshot(session_uuid=str(session.public_id), user=request.user)
+        if snapshot["audience"] != "spectator":
+            raise Http404
+        return _hangman_page(request, session, snapshot, audience="spectator")
+    except (GameActionError, GameEngineError) as error:
+        raise Http404 from error
+
+
+def hangman_overlay(request, session_uuid):
+    session = _hangman_session(session_uuid)
+    token = request.GET.get("token", "")
+    try:
+        snapshot = get_overlay_snapshot(session_uuid=str(session.public_id), token=token)
+        if session.engine_key != "hangman":
+            raise Http404
+        return _hangman_page(request, session, snapshot, audience="spectator", overlay=True, token=token)
+    except (GameActionError, GameEngineError) as error:
+        raise Http404 from error
+
+
+def hangman_rules(request):
+    return render(request, "play/hangman_rules.html", {"page_title": "Hangman rules"})

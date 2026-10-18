@@ -1,0 +1,10 @@
+{% extends "games/base.html" %}
+{% block content %}
+<main style="max-width: 48rem; margin: 3rem auto; padding: 1.5rem;">
+  <p><a href="{% url 'games:catalog' %}">← Game catalog</a></p>
+  <h1>How to play Hangman</h1>
+  <p>Players take turns choosing one unused letter. Every occurrence of a correct letter appears in the hidden word. An incorrect guess uses one attempt.</p>
+  <p>The team wins by revealing every letter before the wrong-guess limit. When the limit is reached, the round ends and the answer is shown.</p>
+  <p>Turns follow seat order. A timed-out turn also uses one attempt. Spectators and OBS overlays see the same masked word as players, and the answer stays hidden until the round ends.</p>
+</main>
+{% endblock %}

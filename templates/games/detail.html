@@ -33,6 +33,7 @@
         <p>{{ game.full_description|default:game.short_description }}</p>
 
         <h2 id="rules">Rules</h2>
+        {% if game.slug == 'hangman' %}<p><a href="{% url 'games:hangman_rules' %}">Read the full Hangman rules</a></p>{% endif %}
         {% if game.rules %}
           <dl class="key-value">
             {% for key, value in game.rules.items %}

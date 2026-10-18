@@ -1069,3 +1069,21 @@ Complete when:
    state isolation, and malformed authoritative state.
 6. Hangman stays unplayable until its action service integration and interfaces
    are complete. Django checks, migration checks, and Python tests pass.
+
+## KSA-030 — Add Hangman Interfaces
+
+Complete when:
+
+1. An authenticated current player can open an existing Hangman session page
+   with the masked word, attempts, turn, and 26 labeled letter controls.
+2. Controls submit only letter guesses through the shared versioned WebSocket
+   action service, wait for confirmed state, and retry unresolved requests on
+   reconnect with the same request ID.
+3. Authorized spectators have a read-only live page. A host-issued, expiring
+   OBS URL provides read-only guest access and revokes when host access changes.
+4. Active HTTP and WebSocket payloads hide the answer. Completed states reveal
+   it with the server-derived result. All pages use no-store responses.
+5. A public rules page explains turns, attempts, timeouts, and outcomes.
+6. HTTP, service, WebSocket, and browser behavior tests cover success, denial,
+   live updates, completion, and hidden-state isolation. Hangman remains
+   unplayable until normal lobby start and full product integration are done.

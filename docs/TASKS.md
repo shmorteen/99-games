@@ -38,6 +38,6 @@
 # Current milestone: Additional Initial Games
 
 - [x] KSA-029 Add Hangman engine
-- [ ] KSA-030 Add Hangman interfaces
+- [x] KSA-030 Add Hangman interfaces
 - [ ] KSA-031 Add Werewolves vs Villagers engine
 - [ ] KSA-032 Add Werewolves vs Villagers interfaces

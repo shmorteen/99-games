@@ -13,6 +13,7 @@ from django.utils import timezone
 
 from games.connect4_state import serialize_state
 from games.engine import GameEngineError, StaleGameState
+from games.hangman import HangmanEngine
 from lobbies.models import LobbyBan, LobbyStatus, MembershipRole, PLAYER_SEAT_ROLES
 from .action_rules import ACTION_RULES
 from .locks import GameActionLockUnavailable, acquire_game_action_lock
@@ -202,7 +203,15 @@ def get_game_snapshot(*, session_uuid: str, user) -> dict:
     ):
         raise GameActionDenied("Game connection is not allowed.")
     state = session.public_state if is_player else session.spectator_state
-    if not is_player and session.engine_key == "connect4":
+    if session.engine_key == "hangman" and session.engine_version == "0.1":
+        try:
+            engine = HangmanEngine()
+            state = (engine.get_public_state if is_player else engine.get_spectator_state)(
+                session.authoritative_state
+            )
+        except GameEngineError as error:
+            raise GameActionDenied("Game state is unavailable.") from error
+    elif not is_player and session.engine_key == "connect4":
         try:
             state = serialize_state(state)
         except GameEngineError as error:
@@ -214,7 +223,10 @@ def get_game_snapshot(*, session_uuid: str, user) -> dict:
         "audience": "player" if is_player else "spectator",
         "actor_id": participant.actor_id if is_player else None,
         "state": state,
-        "private_state": participant.private_state if is_player else None,
+        "private_state": (
+            {} if session.engine_key == "hangman" and is_player
+            else participant.private_state if is_player else None
+        ),
     }
 
 

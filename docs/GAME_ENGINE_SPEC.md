@@ -63,8 +63,8 @@ Startup imports the module paths in `KSA_GAME_ENGINE_MODULES` and calls
 `register_engines(registry)` when a module provides it. Duplicate key/version
 registrations and invalid versions are rejected and surfaced through Django
 system checks. Playable catalog entries must reference a registered engine, but
-Connect4, Hangman, and Werewolves vs Villagers remain unregistered until their
-actual engine classes exist.
+Hangman is registered at version `0.1`. Connect4 and Werewolves vs Villagers
+remain unregistered until their actual engine classes exist.
 
 ## Action Handling
 
@@ -159,7 +159,11 @@ The authoritative state contains the answer. Active public, spectator, and
 actor-private serializers expose only a letter mask, guesses, attempts, turn,
 and player IDs; they reveal the answer and server-derived result only after
 completion. The engine has no persistence or WebSocket side effects. Hangman
-remains unplayable in the catalog until action transport and interfaces exist.
+remains unplayable in the catalog until normal lobby start and full product
+integration exist. KSA-030 routes its guesses through the shared transactional
+game-action service and renders player, spectator, rules, and signed overlay
+pages for existing sessions. Player and spectator snapshots are derived from
+authoritative state before delivery; no active view receives the answer.
 
 ## Test Expectations
 

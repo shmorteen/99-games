@@ -1,9 +1,10 @@
-"""Host-issued, short-lived read-only Connect4 broadcast access."""
+"""Host-issued, short-lived read-only game broadcast access."""
 
 from django.core import signing
 
 from games.connect4_state import serialize_state
 from games.engine import GameEngineError
+from games.hangman import HangmanEngine
 from lobbies.models import LobbyBan
 
 from .models import GameSession
@@ -27,16 +28,23 @@ def get_overlay_snapshot(*, session_uuid, token):
         if not isinstance(claims, dict) or claims.get("session") != str(session_uuid):
             raise GameActionDenied("Overlay link is unavailable.")
         session = GameSession.objects.select_related("lobby", "lobby__host").get(
-            public_id=session_uuid, engine_key="connect4", engine_version="0.1",
-            game__slug="connect4",
+            public_id=session_uuid, engine_version="0.1",
         )
+        if (session.engine_key, session.game.slug) not in (
+            ("connect4", "connect4"), ("hangman", "hangman")
+        ):
+            raise GameActionDenied("Overlay link is unavailable.")
         host = session.lobby.host
         if (
             claims.get("host") != host.pk or not host.is_active
             or LobbyBan.objects.active().filter(lobby=session.lobby, user=host).exists()
         ):
             raise GameActionDenied("Overlay link is unavailable.")
-        state = serialize_state(session.spectator_state)
+        state = (
+            serialize_state(session.spectator_state)
+            if session.engine_key == "connect4"
+            else HangmanEngine().get_spectator_state(session.authoritative_state)
+        )
     except (signing.BadSignature, GameSession.DoesNotExist, GameEngineError,
             TypeError, ValueError) as error:
         raise GameActionDenied("Overlay link is unavailable.") from error
