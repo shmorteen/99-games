@@ -203,9 +203,13 @@ Game start transitions the lobby from `READY_CHECK` to `STARTING` to `ACTIVE`
 inside one transaction. If engine validation, initial-state creation, or state
 serialization fails, the transaction rolls back so no partial session remains
 and the lobby returns to its previous ready-check state. Successful starts emit
-`GAME_STARTED` with public initial state to the lobby group, then send
-`GAME_STARTED_PRIVATE` only to each authenticated player group. Spectators do
-not receive private player state.
+`GAME_STARTED` with only the engine's spectator state to eligible lobby
+connections. Authenticated connected nonmembers do not receive game-start
+state; development guest spectators can receive it when explicitly enabled.
+Each human player receives `GAME_STARTED_PRIVATE` through the lobby's per-user
+group with the player public state and their own private state, including an
+empty private state. The persisted session stores authoritative initial,
+public, spectator, and per-participant private state separately.
 
 Ready-check expiry currently supports the `return_to_waiting` behavior: expired
 ready checks clear ready flags, clear ready-check timestamps, return the lobby

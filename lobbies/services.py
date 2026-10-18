@@ -612,7 +612,7 @@ def _idempotent_game_start_result(*, lobby, actor, key: str) -> GameStartResult 
 def _game_start_result_from_session(session: GameSession) -> GameStartResult:
     private_states_by_user_id = {}
     for participant in session.participants.select_related("user").all():
-        if participant.user_id and participant.private_state:
+        if participant.user_id and participant.role in PLAYER_SEAT_ROLES:
             private_states_by_user_id[str(participant.user_id)] = {
                 "participant_uuid": str(participant.public_id),
                 "actor_id": participant.actor_id,
@@ -718,7 +718,7 @@ def _create_session_participants(
             bot_reference=membership.bot_reference if membership.is_bot else "",
             private_state=private_state,
         )
-        if membership.user_id and private_state:
+        if membership.user_id and membership.pk in player_membership_ids:
             private_states_by_user_id[str(membership.user_id)] = {
                 "participant_uuid": str(participant.public_id),
                 "actor_id": actor_id,

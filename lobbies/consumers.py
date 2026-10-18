@@ -208,6 +208,7 @@ class LobbyConsumer(AsyncJsonWebsocketConsumer):
     async def handle_game_start(self, payload, request_id):
         result = await self._start_game(request_id)
         private_states = result.pop("private_states_by_user_id")
+        public_state = result.pop("public_state")
         await self.group_lobby_event("GAME_STARTED", result, request_id=request_id)
         for user_id, private_payload in private_states.items():
             await self.channel_layer.group_send(
@@ -216,7 +217,7 @@ class LobbyConsumer(AsyncJsonWebsocketConsumer):
                     "type": "lobby.event",
                     "message": self.event_message(
                         "GAME_STARTED_PRIVATE",
-                        private_payload,
+                        {**private_payload, "public_state": public_state},
                         request_id=request_id,
                     ),
                 },
@@ -252,6 +253,9 @@ class LobbyConsumer(AsyncJsonWebsocketConsumer):
         )
 
     async def lobby_event(self, event):
+        if event["message"]["type"] == "GAME_STARTED":
+            if not await self._can_receive_game_started():
+                return
         await self.send_json(event["message"])
 
     async def send_lobby_event(self, event_type, payload, *, request_id=None):
@@ -356,6 +360,24 @@ class LobbyConsumer(AsyncJsonWebsocketConsumer):
             return
         membership.connection_status = MembershipConnectionStatus.DISCONNECTED
         membership.save(update_fields=["connection_status", "updated_at"])
+
+    @database_sync_to_async
+    def _can_receive_game_started(self):
+        try:
+            lobby = self._lobby()
+        except GameLobby.DoesNotExist:
+            return False
+        if not self._connect_user_allowed(lobby):
+            return False
+        membership = self._active_membership(lobby)
+        if membership is not None:
+            return membership.role != MembershipRole.SPECTATOR or lobby.allow_spectators
+        return bool(
+            not getattr(self.user, "is_authenticated", False)
+            and getattr(settings, "KSA_ALLOW_GUEST_SPECTATOR_WEBSOCKETS", False)
+            and settings.DEBUG
+            and lobby.allow_spectators
+        )
 
     @database_sync_to_async
     def _join_lobby(self, payload, request_id):

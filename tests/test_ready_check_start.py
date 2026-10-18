@@ -96,6 +96,11 @@ class FailingInitialStateEngine(ReadyCheckEngine):
         raise RuntimeError("engine exploded")
 
 
+class EmptyPrivateStateEngine(ReadyCheckEngine):
+    def get_private_state(self, state, actor_id):
+        return {}
+
+
 @contextmanager
 def recording_lock(calls):
     calls.append("acquired")
@@ -376,6 +381,36 @@ def test_engine_failure_rolls_back_session_and_lobby_status(monkeypatch, caplog)
     assert "Could not start game for lobby" in caplog.text
 
 
+def test_start_keeps_player_delivery_when_private_state_is_empty(monkeypatch):
+    lobby, host, _, player, _, _, _ = prepare_ready_lobby(
+        monkeypatch,
+        game_overrides={"engine_class": EmptyPrivateStateEngine},
+    )
+    begin_ready_check(lobby=lobby, user=host)
+    set_membership_ready(lobby=lobby, user=host, is_ready=True)
+    set_membership_ready(lobby=lobby, user=player, is_ready=True)
+
+    result = start_game(
+        lobby=lobby,
+        user=host,
+        idempotency_key="empty-private-state",
+        lock_context=lambda _lobby_id: recording_lock([]),
+    )
+
+    assert set(result.private_states_by_user_id) == {str(host.pk), str(player.pk)}
+    assert all(
+        delivery["private_state"] == {}
+        for delivery in result.private_states_by_user_id.values()
+    )
+    retried = start_game(
+        lobby=lobby,
+        user=host,
+        idempotency_key="empty-private-state",
+        lock_context=lambda _lobby_id: recording_lock([]),
+    )
+    assert retried.private_states_by_user_id == result.private_states_by_user_id
+
+
 def test_ready_check_timeout_returns_lobby_to_waiting(monkeypatch):
     lobby, host, host_membership, _, _, _, _ = prepare_ready_lobby(monkeypatch)
     begin_ready_check(lobby=lobby, user=host, timeout_seconds=10)
@@ -416,6 +451,7 @@ def test_websocket_ready_check_and_game_start_broadcasts_public_and_private(monk
         monkeypatch,
         include_spectator=True,
     )
+    outsider = create_user("outsider")
 
     async def scenario():
         host_socket, host_connected = await connect_lobby(lobby, host)
@@ -427,6 +463,10 @@ def test_websocket_ready_check_and_game_start_broadcasts_public_and_private(monk
             spectator_membership.user,
         )
         await spectator_socket.receive_json_from()
+        outsider_socket, outsider_connected = await connect_lobby(
+            lobby, outsider
+        )
+        await outsider_socket.receive_json_from()
 
         await host_socket.send_json_to(
             {
@@ -438,6 +478,7 @@ def test_websocket_ready_check_and_game_start_broadcasts_public_and_private(monk
         ready_started = await player_socket.receive_json_from()
         await host_socket.receive_json_from()
         await spectator_socket.receive_json_from()
+        await outsider_socket.receive_json_from()
 
         await host_socket.send_json_to(
             {"type": "LOBBY_READY", "request_id": "host-ready", "payload": {}}
@@ -445,12 +486,14 @@ def test_websocket_ready_check_and_game_start_broadcasts_public_and_private(monk
         await host_socket.receive_json_from()
         await player_socket.receive_json_from()
         await spectator_socket.receive_json_from()
+        await outsider_socket.receive_json_from()
         await player_socket.send_json_to(
             {"type": "LOBBY_READY", "request_id": "player-ready", "payload": {}}
         )
         await host_socket.receive_json_from()
         await player_socket.receive_json_from()
         await spectator_socket.receive_json_from()
+        await outsider_socket.receive_json_from()
 
         await host_socket.send_json_to(
             {"type": "GAME_START", "request_id": "start-game", "payload": {}}
@@ -460,14 +503,18 @@ def test_websocket_ready_check_and_game_start_broadcasts_public_and_private(monk
         spectator_public = await spectator_socket.receive_json_from()
         host_private = await host_socket.receive_json_from()
         player_private = await player_socket.receive_json_from()
+        outsider_received_nothing = await outsider_socket.receive_nothing(timeout=0.2)
 
         await host_socket.disconnect()
         await player_socket.disconnect()
         await spectator_socket.disconnect()
+        await outsider_socket.disconnect()
         return (
             host_connected,
             player_connected,
             spectator_connected,
+            outsider_connected,
+            outsider_received_nothing,
             ready_started,
             host_public,
             player_public,
@@ -480,6 +527,8 @@ def test_websocket_ready_check_and_game_start_broadcasts_public_and_private(monk
         host_connected,
         player_connected,
         spectator_connected,
+        outsider_connected,
+        outsider_received_nothing,
         ready_started,
         host_public,
         player_public,
@@ -491,10 +540,19 @@ def test_websocket_ready_check_and_game_start_broadcasts_public_and_private(monk
     assert host_connected is True
     assert player_connected is True
     assert spectator_connected is True
+    assert outsider_connected is True
+    assert outsider_received_nothing is True
     assert_schema(ready_started, "READY_CHECK_STARTED", lobby)
     assert_schema(host_public, "GAME_STARTED", lobby)
     assert_schema(player_public, "GAME_STARTED", lobby)
     assert_schema(spectator_public, "GAME_STARTED", lobby)
+    assert spectator_public["payload"]["spectator_state"] == {
+        "actors": [str(host_private["payload"]["actor_id"]), str(player_private["payload"]["actor_id"])]
+    }
+    assert "public_state" not in spectator_public["payload"]
+    assert "rounds" not in str(spectator_public["payload"])
+    assert host_private["payload"]["public_state"]["rounds"] == 2
+    assert player_private["payload"]["public_state"]["rounds"] == 2
     assert "private_state" not in spectator_public["payload"]
     assert_schema(host_private, "GAME_STARTED_PRIVATE", lobby)
     assert_schema(player_private, "GAME_STARTED_PRIVATE", lobby)
