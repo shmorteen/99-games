@@ -1052,3 +1052,20 @@ Complete when:
    timeout behavior, rules page, and final integration requirements are done.
 8. Django checks, migration checks, migrations, Python tests, and applicable
    frontend checks pass.
+
+## KSA-029 — Add Hangman Engine
+
+Complete when:
+
+1. The `hangman` version `0.1` engine is registered and creates an authoritative
+   state for one to eight uniquely seated players using a server-owned word.
+2. Active public, spectator, and player-private serializers conceal the answer;
+   completed states expose the answer and server-derived win or loss result.
+3. One-letter guesses rotate by seat. Invalid payloads, repeated guesses,
+   outsiders, stale versions, out-of-turn actions, and completed actions fail.
+4. Wrong guesses and deterministic turn timeouts consume the configured attempt
+   limit. Correct guesses reveal letters and completing the word wins.
+5. Unit tests cover both outcomes, timeout, configuration, authorization,
+   state isolation, and malformed authoritative state.
+6. Hangman stays unplayable until its action service integration and interfaces
+   are complete. Django checks, migration checks, and Python tests pass.

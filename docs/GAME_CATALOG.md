@@ -8,7 +8,7 @@ its engine, interface, rules, spectator view, overlay, and tests are complete.
 | Game | Status | Notes |
 | --- | --- | --- |
 | Connect4 | Seeded, not playable | Pure rules, versioned WebSocket actions, player and spectator pages, host-issued OBS overlay, deterministic `casual` bot turns, and validated result/replay pages exist for completed sessions. Bot support is declared; the registered engine, rules, timeout, and final integration requirements remain. |
-| Hangman | Seeded, not playable | Catalog metadata exists; private answer handling is deferred. |
+| Hangman | Seeded, not playable | Registered `0.1` engine provides server-selected words, rotating letter guesses, answer-safe active snapshots, timeouts, and results. Action transport and interfaces remain pending. |
 | Werewolves vs Villagers | Seeded, not playable | Catalog metadata exists; hidden-role engine work is deferred. |
 
 ## Initial Categories

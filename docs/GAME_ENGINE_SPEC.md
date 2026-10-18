@@ -144,6 +144,23 @@ Connect4 remains unregistered and `is_playable=False` until the remaining
 engine, action transport, interface, spectator, overlay, bot, and result
 persistence work is complete.
 
+## Hangman Engine (KSA-029)
+
+`games.hangman.HangmanEngine` is registered as `hangman` version `0.1`.
+The engine selects an answer from a server-owned word list during initial state
+creation; configuration accepts only `max_wrong_guesses` from 1 through 12.
+One to eight unique, consecutively seated actor UUIDs take turns guessing one
+letter. Duplicate guesses, out-of-turn actions, client result fields, and stale
+action versions are rejected before a transition is returned. A wrong guess
+or timeout consumes an attempt. The game ends when every letter is found or
+the attempt limit is reached.
+
+The authoritative state contains the answer. Active public, spectator, and
+actor-private serializers expose only a letter mask, guesses, attempts, turn,
+and player IDs; they reveal the answer and server-derived result only after
+completion. The engine has no persistence or WebSocket side effects. Hangman
+remains unplayable in the catalog until action transport and interfaces exist.
+
 ## Test Expectations
 
 Each engine requires tests for:

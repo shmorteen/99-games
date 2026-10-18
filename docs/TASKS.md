@@ -34,3 +34,10 @@
 - [x] KSA-026 Add spectator and overlay views
 - [x] KSA-027 Add Connect4 bots
 - [x] KSA-028 Add replay and results
+
+# Current milestone: Additional Initial Games
+
+- [x] KSA-029 Add Hangman engine
+- [ ] KSA-030 Add Hangman interfaces
+- [ ] KSA-031 Add Werewolves vs Villagers engine
+- [ ] KSA-032 Add Werewolves vs Villagers interfaces
