@@ -235,6 +235,13 @@ Connect4 `0.1` is the first action-rule registration. Its seeded catalog entry
 remains unplayable, so this route can act on an existing session but does not
 enable production lobby start for Connect4 yet.
 
+The Connect4 player page reuses the `game_route` issued at session start. It
+authorizes a session player before returning HTML, renders the saved public
+board for first paint, and embeds a JSON-escaped snapshot. A small static
+client submits versioned moves through the session WebSocket and paints only
+confirmed snapshots. Reconnect uses the same idempotency UUID for an unresolved
+action. No game result or turn decision is accepted from the browser.
+
 1. A client sends a game or lobby action over HTTP or WebSocket.
 2. The server authenticates the user and authorizes the action.
 3. The relevant service validates the action against current authoritative state.

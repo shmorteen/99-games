@@ -1,0 +1,288 @@
+.connect4-app {
+  --c4-ink: #17243b;
+  --c4-navy: #101f39;
+  --c4-blue: #2156b8;
+  --c4-red: #d33e45;
+  --c4-yellow: #f4c83f;
+  color: var(--c4-ink);
+}
+
+.connect4-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 24px;
+  margin-bottom: 30px;
+}
+
+.connect4-eyebrow,
+.connect4-kicker {
+  margin: 0 0 8px;
+  color: #3761a3;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.connect4-header h1 {
+  margin: 0;
+  font-size: clamp(2.1rem, 5vw, 3.8rem);
+}
+
+.connect4-lede {
+  max-width: 50ch;
+  margin: 10px 0 0;
+  color: #526176;
+}
+
+.connect4-back {
+  flex: none;
+  font-weight: 700;
+}
+
+.connect4-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(250px, 0.7fr);
+  align-items: start;
+  gap: 22px;
+}
+
+.connect4-panel,
+.connect4-status-card,
+.connect4-info-card {
+  border: 1px solid #d9e2f0;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 12px 35px rgb(25 53 92 / 7%);
+}
+
+.connect4-panel {
+  padding: clamp(15px, 3vw, 28px);
+}
+
+.connect4-board-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.connect4-board-head h2,
+.connect4-side h2 {
+  margin: 0;
+}
+
+.connect4-connection {
+  border-radius: 999px;
+  padding: 7px 11px;
+  color: #754b0a;
+  background: #fff0cf;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.connect4-connection.is-online {
+  color: #126345;
+  background: #dcf8ea;
+}
+
+.connect4-board-frame {
+  padding: clamp(10px, 2vw, 20px);
+  border-radius: 20px;
+  background: linear-gradient(150deg, #163b87, var(--c4-blue));
+  box-shadow: inset 0 -8px 0 rgb(11 40 105 / 45%), 0 14px 25px rgb(27 70 144 / 18%);
+}
+
+.connect4-controls {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: clamp(3px, 1vw, 10px);
+  margin-bottom: 10px;
+}
+
+.connect4-drop {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 52px;
+  padding: 5px;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  background: #ecf4ff;
+  color: #173979;
+  line-height: 1.05;
+}
+
+.connect4-drop:not(:disabled):hover {
+  background: #fff;
+  transform: translateY(-2px);
+}
+
+.connect4-drop:focus-visible {
+  outline: 3px solid var(--c4-yellow);
+  outline-offset: 3px;
+}
+
+.connect4-drop:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+}
+
+.connect4-drop span:first-child {
+  font-size: 1.15rem;
+}
+
+.connect4-column-number {
+  font-size: 0.75rem;
+}
+
+.connect4-board {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: clamp(3px, 1vw, 10px);
+  table-layout: fixed;
+}
+
+.connect4-cell {
+  padding: 0;
+  border-radius: 50%;
+  background: #dce7f6;
+  box-shadow: inset 0 4px 8px rgb(7 32 82 / 25%);
+  text-align: center;
+}
+
+.connect4-disc {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  font-size: clamp(0.75rem, 2vw, 1.35rem);
+  font-weight: 900;
+}
+
+.connect4-cell-red .connect4-disc {
+  color: #fff;
+  background: var(--c4-red);
+  box-shadow: inset 0 -5px 0 rgb(110 8 24 / 28%);
+}
+
+.connect4-cell-yellow .connect4-disc {
+  color: #513c00;
+  background: var(--c4-yellow);
+  box-shadow: inset 0 -5px 0 rgb(109 78 0 / 22%);
+}
+
+.connect4-help,
+.connect4-version {
+  margin: 16px 0 0;
+  color: #607087;
+  font-size: 0.88rem;
+}
+
+.connect4-side {
+  display: grid;
+  gap: 16px;
+}
+
+.connect4-status-card,
+.connect4-info-card {
+  padding: 22px;
+}
+
+.connect4-status-card {
+  border-color: #b7cdec;
+  background: #eef5ff;
+}
+
+.connect4-status-card h2 {
+  font-size: clamp(1.25rem, 2.5vw, 1.7rem);
+  line-height: 1.2;
+}
+
+.connect4-message,
+.connect4-alert {
+  margin: 10px 0 0;
+  color: #9a291f;
+  font-weight: 700;
+}
+
+.connect4-message:empty {
+  display: none;
+}
+
+.connect4-info-card h2 {
+  margin-bottom: 14px;
+  font-size: 1rem;
+}
+
+.connect4-info-card p {
+  margin: 0;
+  color: #526176;
+}
+
+.connect4-player-row {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 7px 0;
+}
+
+.connect4-swatch {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  font-size: 0.8rem;
+  font-weight: 900;
+}
+
+.connect4-swatch-red {
+  color: #fff;
+  background: var(--c4-red);
+}
+
+.connect4-swatch-yellow {
+  color: #513c00;
+  background: var(--c4-yellow);
+}
+
+.connect4-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 780px) {
+  .connect4-header {
+    align-items: start;
+    flex-direction: column;
+  }
+
+  .connect4-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 430px) {
+  .connect4-panel {
+    padding: 10px;
+  }
+
+  .connect4-board-head {
+    padding: 6px;
+  }
+
+  .connect4-drop {
+    min-height: 44px;
+  }
+}

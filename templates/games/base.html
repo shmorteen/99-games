@@ -268,6 +268,7 @@
       }
     }
   </style>
+  {% block extra_head %}{% endblock %}
 </head>
 <body>
   <main class="site-shell">
@@ -280,5 +281,6 @@
     </nav>
     {% block content %}{% endblock %}
   </main>
+  {% block extra_scripts %}{% endblock %}
 </body>
 </html>

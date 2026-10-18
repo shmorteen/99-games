@@ -948,3 +948,32 @@ Complete when:
    spectator interfaces, overlay, and other engine requirements are complete.
 9. Django checks, migration checks, migrations on a disposable database, and
    pytest pass.
+
+## KSA-025 — Add Connect4 Player Interface
+
+Complete when:
+
+1. The game-start route `/games/connect4/sessions/<uuid>/` serves a player-only
+   Connect4 page for an existing matching session. Anonymous, outsider,
+   spectator, inactive, or non-Connect4 access is rejected.
+2. The first HTTP render shows the server's public board, current turn,
+   player marker, move count, and terminal result without exposing
+   authoritative or other private state.
+3. Seven accessible column buttons and a labeled six-by-seven board work at
+   mobile and desktop widths. Empty, full, out-of-turn, disconnected, pending,
+   and completed conditions disable the appropriate controls.
+4. The client sends only `drop_disc` with an integer column, a UUID request
+   ID, and the current state version. It waits for server messages before
+   changing the board or result.
+5. `GAME_SNAPSHOT`, `GAME_STATE`, and `GAME_ACTION_ACK` update the view.
+   Connection loss disables controls; reconnect resends an unresolved move
+   with its original request ID or accepts a newer authoritative snapshot.
+6. Errors are announced, stale state triggers resync, and status and cells
+   have text labels in addition to color.
+7. Page tests cover authorization, first render, turns, full columns,
+   completed results, and public-state isolation. A dependency-free client
+   behavior check covers move submission, live updates, and reconnect retry.
+8. The seeded Connect4 definition remains unplayable until the remaining
+   spectator, overlay, engine, and other required work is complete.
+9. Django checks, migration checks, migrations on a disposable database,
+   Python tests, and configured frontend checks pass.

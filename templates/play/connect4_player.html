@@ -1,0 +1,88 @@
+{% extends "games/base.html" %}
+{% load static %}
+
+{% block extra_head %}
+  <link rel="stylesheet" href="{% static 'play/connect4.css' %}">
+{% endblock %}
+
+{% block content %}
+  <div id="connect4-app" class="connect4-app" data-ws-path="/ws/games/{{ session.public_id }}/">
+    <header class="connect4-header">
+      <div>
+        <p class="connect4-eyebrow">Live match · Connect4</p>
+        <h1>Four in a row.</h1>
+        <p class="connect4-lede">Drop a disc into a column. The first player to connect four wins.</p>
+      </div>
+      <a class="connect4-back" href="{% url 'games:catalog' %}">← Game catalog</a>
+    </header>
+
+    <div class="connect4-layout">
+      <section class="connect4-panel" aria-labelledby="board-heading">
+        <div class="connect4-board-head">
+          <div>
+            <p class="connect4-kicker">Match board</p>
+            <h2 id="board-heading">Your game</h2>
+          </div>
+          <span id="connect4-connection" class="connect4-connection" role="status">Connecting…</span>
+        </div>
+
+        <div class="connect4-board-frame">
+          <div class="connect4-controls" role="group" aria-label="Choose a column">
+            {% for column in columns %}
+              <button type="button" class="connect4-drop" data-column="{{ column.index }}"
+                      aria-label="Drop disc in column {{ column.number }}" disabled>
+                <span aria-hidden="true">↓</span><span class="connect4-column-number">{{ column.number }}</span>
+              </button>
+            {% endfor %}
+          </div>
+          <table class="connect4-board" aria-label="Connect4 board">
+            <caption class="connect4-sr-only">Six rows and seven columns, read from top to bottom.</caption>
+            <tbody id="connect4-board">
+              {% for row in board_rows %}
+                <tr>
+                  {% for cell in row %}
+                    <td class="connect4-cell connect4-cell-{{ cell|default:'empty' }}"
+                        aria-label="Row {{ forloop.parentloop.counter }}, column {{ forloop.counter }}: {{ cell|default:'empty' }}">
+                      <span class="connect4-disc" aria-hidden="true">{% if cell == 'red' %}R{% elif cell == 'yellow' %}Y{% endif %}</span>
+                    </td>
+                  {% endfor %}
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <p class="connect4-help">Choose a numbered column above the board. Discs fall to the lowest open space.</p>
+        <noscript><p class="connect4-alert">Enable JavaScript to make moves and receive live updates.</p></noscript>
+      </section>
+
+      <aside class="connect4-side" aria-label="Match information">
+        <section class="connect4-status-card">
+          <p class="connect4-kicker">Current turn</p>
+          <h2 id="connect4-status" aria-live="polite">{{ status_text }}</h2>
+          <p id="connect4-message" class="connect4-message" role="alert"></p>
+        </section>
+        <section class="connect4-info-card">
+          <h2>Players</h2>
+          <div class="connect4-player-row">
+            <span class="connect4-swatch connect4-swatch-red" aria-hidden="true">R</span>
+            <span>Red {% if player_marker == 'red' %}<strong>· You</strong>{% else %}· Opponent{% endif %}</span>
+          </div>
+          <div class="connect4-player-row">
+            <span class="connect4-swatch connect4-swatch-yellow" aria-hidden="true">Y</span>
+            <span>Yellow {% if player_marker == 'yellow' %}<strong>· You</strong>{% else %}· Opponent{% endif %}</span>
+          </div>
+          <p class="connect4-version">Move <span id="connect4-move-count">{{ snapshot.state.move_count }}</span> of 42</p>
+        </section>
+        <section class="connect4-info-card">
+          <h2>How to win</h2>
+          <p>Connect four of your discs horizontally, vertically, or diagonally. A full board without a line is a draw.</p>
+        </section>
+      </aside>
+    </div>
+  </div>
+  {{ snapshot|json_script:"connect4-bootstrap" }}
+{% endblock %}
+
+{% block extra_scripts %}
+  <script src="{% static 'play/connect4.js' %}" defer></script>
+{% endblock %}

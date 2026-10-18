@@ -202,6 +202,7 @@ def get_game_snapshot(*, session_uuid: str, user) -> dict:
         "state_version": session.state_version,
         "status": session.status,
         "audience": "player" if is_player else "spectator",
+        "actor_id": participant.actor_id if is_player else None,
         "state": session.public_state if is_player else session.spectator_state,
         "private_state": participant.private_state if is_player else None,
     }

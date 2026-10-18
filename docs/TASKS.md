@@ -30,7 +30,7 @@
 - [x] KSA-022 Add legal move validation
 - [x] KSA-023 Add win and draw detection
 - [x] KSA-024 Add Connect4 WebSocket actions
-- [ ] KSA-025 Add Connect4 player interface
+- [x] KSA-025 Add Connect4 player interface
 - [ ] KSA-026 Add spectator and overlay views
 - [ ] KSA-027 Add Connect4 bots
 - [ ] KSA-028 Add replay and results

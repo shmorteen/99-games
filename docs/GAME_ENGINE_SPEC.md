@@ -130,6 +130,16 @@ stores a UUID-keyed receipt for idempotent retries. The game WebSocket route is
 `server_timestamp`, `session_uuid`, and `payload`. Client `GAME_ACTION` payloads
 contain only `action` and `state_version`.
 
+KSA-025 adds the player page at the game-start route. The HTTP response
+authorizes a current player, renders the saved public state, and embeds only
+that player's snapshot as escaped JSON. The browser uses the same session
+WebSocket, shows server-confirmed board updates, and disables move controls
+while disconnected, waiting for a response, out of turn, full, or completed.
+It retries an unresolved action after reconnect with its original request UUID
+and state version. The browser never calculates a winner or persists a move.
+The dependency-free client behavior check is
+`node tests/frontend/connect4_client_test.js` when Node.js is available.
+
 Connect4 remains unregistered and `is_playable=False` until the remaining
 engine, action transport, interface, spectator, overlay, bot, and result
 persistence work is complete.
