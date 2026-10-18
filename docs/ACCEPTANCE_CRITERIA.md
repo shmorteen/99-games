@@ -873,3 +873,27 @@ Complete when:
    later tasks.
 8. Django checks, migration checks, migrations on a disposable database, and
    pytest pass.
+
+## KSA-022 — Add Legal Move Validation
+
+Complete when:
+
+1. A pure Connect4 move module lists only open columns for the current actor.
+   Unknown actors are rejected and non-current actors have no legal actions.
+2. A `drop_disc` action accepts only an integer column from zero through six.
+   Missing, boolean, non-integer, extra, and client-owned result or turn fields
+   are rejected as invalid payloads. Out-of-range and full columns are illegal.
+3. Out-of-turn actors are rejected as unauthorized, and unknown actors cannot
+   submit a move.
+4. A valid action places the actor's server-owned marker in the lowest empty
+   row, increments move count, changes the turn, and returns a JSON-serializable
+   `GameTransition` with a server-derived move event.
+5. Rejected actions leave the supplied state unchanged. State validation
+   rejects floating discs before calculating or applying an action.
+6. Tests cover valid consecutive moves, legal-column calculation, malformed
+   actions, full and out-of-range columns, out-of-turn and unknown actors,
+   corrupt state, and non-mutation on rejection.
+7. Connect4 remains unregistered and unplayable. Result calculation and the
+   transactional action-persistence path remain later tasks.
+8. Django checks, migration checks, migrations on a disposable database, and
+   pytest pass.

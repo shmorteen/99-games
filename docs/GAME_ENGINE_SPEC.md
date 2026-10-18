@@ -100,6 +100,14 @@ empty cells are `null`. `serialize_state` returns detached public data and
 omits any extra fields. It checks structural shape and turn/count parity but
 does not decide whether a column drop is legal or whether a win occurred.
 
+`games.connect4_moves` (KSA-022) lists open columns for the current actor and
+returns a pure `GameTransition` for a valid zero-based `drop_disc` action. The
+module rejects client-supplied row, turn, score, or winner fields. It validates
+the actor, turn, column, and board before placing a disc in a detached state.
+The application service added later must authenticate the user, lock the
+session, check its version, apply this rule path, and persist exactly one
+transition. KSA-022 itself does not write to the database or determine results.
+
 Connect4 remains unregistered and `is_playable=False` until the remaining
 engine, action, interface, spectator, overlay, bot, and result work is complete.
 

@@ -21,8 +21,8 @@ checks`, `KSA-009 Add Docker Compose`, `KSA-010 Add GitHub Actions`,
 catalog pages`, `KSA-014 Add BaseGameEngine`, `KSA-015 Add
 GameEngineRegistry`, `KSA-016 Add GameLobby`, `KSA-017 Add LobbyMembership`,
 `KSA-018 Add lobby join/leave service`, `KSA-019 Add lobby WebSocket
-consumer`, `KSA-020 Add ready-check and game start`, and `KSA-021 Add Connect4
-state representation` are complete. The
+consumer`, `KSA-020 Add ready-check and game start`, `KSA-021 Add Connect4
+state representation`, and `KSA-022 Add legal move validation` are complete. The
 repository contains a minimal Django project shell with
 environment-driven settings, URL/ASGI/WSGI entrypoints, dependency metadata,
 PostgreSQL-capable database configuration, Redis-backed channel layer
@@ -32,9 +32,9 @@ health endpoints, Docker Compose local services, GitHub Actions CI, the first
 game catalog category and definition models, public catalog pages, the shared
 game engine contract, the engine registry, lobby metadata, lobby memberships,
 transactional lobby join/leave services, the lobby WebSocket consumer,
-durable game-session start flow, a pure Connect4 state module, and smoke tests.
-Connect4 remains unplayable until its rules, transport, and interfaces are
-complete.
+durable game-session start flow, pure Connect4 state and move-rule modules,
+and smoke tests. Connect4 remains unplayable until its results, transport,
+and interfaces are complete.
 
 ## Documentation
 

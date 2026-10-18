@@ -1,7 +1,7 @@
 """Pure, JSON-safe Connect4 state representation for KSA-021.
 
 Actor records must come from the server's lobby memberships. No game engine is
-registered here: legal moves, results, timeouts, and bots are later tasks.
+registered here: results, timeouts, persistence, and bots are later tasks.
 """
 
 from __future__ import annotations
@@ -193,6 +193,16 @@ def _state_board(value: object) -> tuple[list[list[str | None]], int, int]:
             else:
                 raise InvalidConnect4State()
         board.append(serialized_row)
+    for column in range(COLUMNS):
+        found_empty = False
+        for row in range(ROWS - 1, -1, -1):
+            cell = board[row][column]
+            if cell is None:
+                found_empty = True
+            elif found_empty:
+                raise InvalidConnect4State(
+                    "Connect4 discs cannot float above empty cells."
+                )
     return board, red_count, yellow_count
 
 
