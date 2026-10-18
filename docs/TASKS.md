@@ -28,7 +28,7 @@
 
 - [x] KSA-021 Add Connect4 state representation
 - [x] KSA-022 Add legal move validation
-- [ ] KSA-023 Add win and draw detection
+- [x] KSA-023 Add win and draw detection
 - [ ] KSA-024 Add Connect4 WebSocket actions
 - [ ] KSA-025 Add Connect4 player interface
 - [ ] KSA-026 Add spectator and overlay views

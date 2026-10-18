@@ -97,8 +97,9 @@ The JSON state has `schema_version: "connect4.state.v1"`, `game`, `status`,
 `rows`, `columns`, `connect_length`, `board`, `players`, `turn_actor_id`, and
 `move_count`. Board row zero is the top row and row five is the bottom row;
 empty cells are `null`. `serialize_state` returns detached public data and
-omits any extra fields. It checks structural shape and turn/count parity but
-does not decide whether a column drop is legal or whether a win occurred.
+omits unrelated fields. It checks structural shape, gravity, turn/count parity,
+and terminal result consistency, but does not decide whether a column drop is
+legal.
 
 `games.connect4_moves` (KSA-022) lists open columns for the current actor and
 returns a pure `GameTransition` for a valid zero-based `drop_disc` action. The
@@ -106,10 +107,22 @@ module rejects client-supplied row, turn, score, or winner fields. It validates
 the actor, turn, column, and board before placing a disc in a detached state.
 The application service added later must authenticate the user, lock the
 session, check its version, apply this rule path, and persist exactly one
-transition. KSA-022 itself does not write to the database or determine results.
+transition. This module does not write to the database.
+
+KSA-023 calculates wins along horizontal, vertical, and both diagonal axes
+after each accepted drop. Four or more contiguous discs win. A full board
+without a line is a draw, and a win on the final cell takes precedence. A
+terminal state has `status: "completed"`, `turn_actor_id: null`, and a public
+`result` object with `outcome` (`win` or `draw`) and `winner_actor_id` (the
+winner's UUID or `null`). The transition has `is_complete: true`, no next
+actor, the same result, and a `connect4_game_completed` event after the disc
+event. Terminal states have no legal actions and reject further drops. The
+state serializer derives the result from the board, rejecting forged results,
+unfinished winning positions, and impossible winner parity.
 
 Connect4 remains unregistered and `is_playable=False` until the remaining
-engine, action, interface, spectator, overlay, bot, and result work is complete.
+engine, action transport, interface, spectator, overlay, bot, and result
+persistence work is complete.
 
 ## Test Expectations
 

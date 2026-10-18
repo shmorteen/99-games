@@ -897,3 +897,25 @@ Complete when:
    transactional action-persistence path remain later tasks.
 8. Django checks, migration checks, migrations on a disposable database, and
    pytest pass.
+
+## KSA-023 — Add Win and Draw Detection
+
+Complete when:
+
+1. Every accepted drop checks horizontal, vertical, and both diagonal axes
+   for four contiguous discs belonging to the actor who moved.
+2. A board filled without a winning line produces a draw; a winning final
+   drop takes precedence over a draw.
+3. Win and draw transitions set the state to completed, clear the next actor,
+   include a server-derived result in both state and `GameTransition`, and
+   emit a completion event after the disc event.
+4. Completed states have no legal actions and reject any further move without
+   changing the supplied state.
+5. State serialization rejects forged terminal results, unfinished states
+   containing a win or full board, and winners inconsistent with move parity.
+6. Tests cover every win direction, a full-board draw, a win on the last cell,
+   terminal action rejection, JSON serialization, and tampered result state.
+7. Connect4 remains unregistered and unplayable; session persistence,
+   transport, interface, spectator, bot, and replay work remain later tasks.
+8. Django checks, migration checks, migrations on a disposable database, and
+   pytest pass.

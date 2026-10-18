@@ -1,7 +1,7 @@
-"""Pure, JSON-safe Connect4 state representation for KSA-021.
+"""Pure, JSON-safe Connect4 state representation and result invariants.
 
 Actor records must come from the server's lobby memberships. No game engine is
-registered here: results, timeouts, persistence, and bots are later tasks.
+registered here: timeouts, persistence, and bots are later tasks.
 """
 
 from __future__ import annotations
@@ -86,7 +86,7 @@ def serialize_state(state: Mapping[str, object]) -> JSONDict:
     if (
         state.get("schema_version") != SCHEMA_VERSION
         or state.get("game") != GAME_KEY
-        or state.get("status") != "in_progress"
+        or state.get("status") not in ("in_progress", "completed")
         or type(state.get("rows")) is not int
         or state["rows"] != ROWS
         or type(state.get("columns")) is not int
@@ -105,14 +105,30 @@ def serialize_state(state: Mapping[str, object]) -> JSONDict:
         or red_count not in (yellow_count, yellow_count + 1)
     ):
         raise InvalidConnect4State()
-    expected_actor = players[move_count % 2]["actor_id"]
-    if state.get("turn_actor_id") != expected_actor:
-        raise InvalidConnect4State()
+    result = calculate_result(board, players, move_count)
+    status = state["status"]
+    if status == "in_progress":
+        expected_actor = players[move_count % 2]["actor_id"]
+        if (
+            result is not None
+            or "result" in state
+            or state.get("turn_actor_id") != expected_actor
+        ):
+            raise InvalidConnect4State()
+    else:
+        if (
+            result is None
+            or state.get("turn_actor_id") is not None
+            or not isinstance(state.get("result"), Mapping)
+            or dict(state["result"]) != result
+        ):
+            raise InvalidConnect4State()
+        expected_actor = None
 
     serialized: JSONDict = {
         "schema_version": SCHEMA_VERSION,
         "game": GAME_KEY,
-        "status": "in_progress",
+        "status": status,
         "rows": ROWS,
         "columns": COLUMNS,
         "connect_length": CONNECT_LENGTH,
@@ -121,8 +137,41 @@ def serialize_state(state: Mapping[str, object]) -> JSONDict:
         "turn_actor_id": expected_actor,
         "move_count": move_count,
     }
+    if result is not None:
+        serialized["result"] = result
     assert_json_serializable(serialized, label="Connect4 state")
     return serialized
+
+
+def calculate_result(
+    board: list[list[str | None]], players: list[JSONDict], move_count: int
+) -> JSONDict | None:
+    """Derive the only possible terminal result from the board and move parity."""
+
+    winning_markers: set[str] = set()
+    for row in range(ROWS):
+        for column in range(COLUMNS):
+            marker = board[row][column]
+            if marker is None:
+                continue
+            for row_step, column_step in ((0, 1), (1, 0), (1, 1), (1, -1)):
+                if all(
+                    0 <= row + offset * row_step < ROWS
+                    and 0 <= column + offset * column_step < COLUMNS
+                    and board[row + offset * row_step][column + offset * column_step]
+                    == marker
+                    for offset in range(CONNECT_LENGTH)
+                ):
+                    winning_markers.add(marker)
+
+    if winning_markers:
+        last_player = players[(move_count - 1) % 2]
+        if move_count == 0 or winning_markers != {last_player["marker"]}:
+            raise InvalidConnect4State("Connect4 winner conflicts with move order.")
+        return {"outcome": "win", "winner_actor_id": last_player["actor_id"]}
+    if move_count == ROWS * COLUMNS:
+        return {"outcome": "draw", "winner_actor_id": None}
+    return None
 
 
 def _players_from_actors(actors: object) -> list[JSONDict]:
@@ -224,6 +273,7 @@ __all__ = [
     "MARKERS",
     "ROWS",
     "SCHEMA_VERSION",
+    "calculate_result",
     "create_initial_state",
     "serialize_state",
     "validate_config",

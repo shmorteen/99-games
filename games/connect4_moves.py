@@ -1,4 +1,4 @@
-"""Pure Connect4 move validation and transitions for KSA-022.
+"""Pure Connect4 move validation and terminal transitions.
 
 The caller remains responsible for authenticating the user, loading and
 locking the authoritative session, checking its version, and persisting the
@@ -9,8 +9,9 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 
-from .connect4_state import COLUMNS, ROWS, serialize_state
+from .connect4_state import COLUMNS, ROWS, calculate_result, serialize_state
 from .engine import (
+    GameAlreadyCompleted,
     GameTransition,
     IllegalGameAction,
     InvalidActionPayload,
@@ -27,6 +28,8 @@ def legal_actions(state: Mapping[str, object], actor_id: str) -> tuple[dict, ...
 
     current = serialize_state(state)
     _player_for_actor(current, actor_id)
+    if current["status"] == "completed":
+        return ()
     if current["turn_actor_id"] != actor_id:
         return ()
     return tuple(
@@ -45,6 +48,8 @@ def apply_move(
 
     current = serialize_state(state)
     player = _player_for_actor(current, actor_id)
+    if current["status"] == "completed":
+        raise GameAlreadyCompleted()
     if current["turn_actor_id"] != actor_id:
         raise UnauthorizedGameAction("It is not this actor's turn.")
     column = _action_column(action)
@@ -61,23 +66,44 @@ def apply_move(
     marker = player["marker"]
     current["board"][row][column] = marker
     current["move_count"] += 1
-    next_actor = current["players"][current["move_count"] % 2]["actor_id"]
+    result = calculate_result(
+        current["board"], current["players"], current["move_count"]
+    )
+    next_actor = (
+        current["players"][current["move_count"] % 2]["actor_id"]
+        if result is None
+        else None
+    )
     current["turn_actor_id"] = next_actor
+    if result is not None:
+        current["status"] = "completed"
+        current["result"] = result
     updated = serialize_state(current)
     move_number = updated["move_count"]
+    events = [
+        {
+            "type": "connect4_disc_dropped",
+            "actor_id": actor_id,
+            "marker": marker,
+            "column": column,
+            "row": row,
+            "move_number": move_number,
+        }
+    ]
+    if result is not None:
+        events.append(
+            {
+                "type": "connect4_game_completed",
+                "result": result,
+                "move_number": move_number,
+            }
+        )
     return GameTransition(
         state=updated,
-        events=(
-            {
-                "type": "connect4_disc_dropped",
-                "actor_id": actor_id,
-                "marker": marker,
-                "column": column,
-                "row": row,
-                "move_number": move_number,
-            },
-        ),
+        events=tuple(events),
+        is_complete=result is not None,
         next_actor=next_actor,
+        result=result,
     )
 
 
