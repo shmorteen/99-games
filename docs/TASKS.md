@@ -33,4 +33,4 @@
 - [x] KSA-025 Add Connect4 player interface
 - [x] KSA-026 Add spectator and overlay views
 - [x] KSA-027 Add Connect4 bots
-- [ ] KSA-028 Add replay and results
+- [x] KSA-028 Add replay and results

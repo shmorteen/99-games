@@ -1027,3 +1027,28 @@ Complete when:
    required engine and product work are complete. Its seeded metadata declares
    bot support with the existing `casual` difficulty.
 8. Django checks, migration checks, migrations, and the full Python suite pass.
+
+## KSA-028 — Add Connect4 Replay and Results
+
+Complete when:
+
+1. A completed Connect4 session's durable action receipts provide one ordered
+   replay step per accepted move, starting from the saved initial state.
+2. Replay reconstruction reapplies each move through the Connect4 rules and
+   checks consecutive versions, actor, action hash, event, saved public and
+   spectator state, terminal result, and final session state. Altered history fails
+   closed instead of showing a partial or misleading result.
+3. Authenticated current players and allowed spectators can view completed
+   result and replay pages. Anonymous, outsider, inactive, departed, disabled
+   spectator, non-Connect4, and unfinished access is denied.
+4. Result and replay views expose only validated public Connect4 state and
+   server-derived winner or draw. Unknown fields in saved state never render.
+5. The replay interface steps between moves with labeled controls and a board
+   whose cells have text labels. Completed live player and spectator pages link
+   to results and replay.
+6. Tests cover win and draw results, ordered history, access rules, missing and
+   tampered data, public-state isolation, and browser replay controls.
+7. Connect4 remains unplayable in the catalog until the registered engine,
+   timeout behavior, rules page, and final integration requirements are done.
+8. Django checks, migration checks, migrations, Python tests, and applicable
+   frontend checks pass.

@@ -13,6 +13,7 @@ from games.engine import GameEngineError
 from .models import GameSession
 from .services import GameActionError, get_game_snapshot
 from .overlays import get_overlay_snapshot, issue_overlay_token
+from .replays import build_connect4_replay
 
 
 def _connect4_session(session_uuid):
@@ -144,4 +145,42 @@ def connect4_player(request, session_uuid):
     })
     response["Cache-Control"] = "no-store"
     response["Referrer-Policy"] = "no-referrer"
+    return response
+
+
+@login_required
+def connect4_results(request, session_uuid):
+    _connect4_session(session_uuid)
+    try:
+        replay = build_connect4_replay(
+            session_uuid=str(session_uuid), user=request.user
+        )
+    except (GameActionError, GameEngineError) as error:
+        raise Http404 from error
+    final_state = replay["frames"][-1]["state"]
+    winner = replay["result"]["winner_marker"]
+    title = f"{winner.title()} wins" if winner else "Draw game"
+    response = render(request, "play/connect4_results.html", {
+        "page_title": "Connect4 results", "session_uuid": session_uuid,
+        "result_title": title, "replay": replay,
+        "board_rows": final_state["board"],
+    })
+    response["Cache-Control"] = "no-store"
+    return response
+
+
+@login_required
+def connect4_replay(request, session_uuid):
+    _connect4_session(session_uuid)
+    try:
+        replay = build_connect4_replay(
+            session_uuid=str(session_uuid), user=request.user
+        )
+    except (GameActionError, GameEngineError) as error:
+        raise Http404 from error
+    response = render(request, "play/connect4_replay.html", {
+        "page_title": "Connect4 replay", "session_uuid": session_uuid,
+        "replay": replay, "board_rows": replay["frames"][0]["state"]["board"],
+    })
+    response["Cache-Control"] = "no-store"
     return response

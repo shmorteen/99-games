@@ -9,6 +9,7 @@
   const connection = document.getElementById("connect4-connection");
   const count = document.getElementById("connect4-move-count");
   const message = document.getElementById("connect4-message");
+  const resultLink = document.getElementById("connect4-result-link");
   let state = initial.state;
   let version = initial.state_version;
   let connected = false;
@@ -42,6 +43,7 @@
       board.appendChild(tr);
     });
     count.textContent = String(state.move_count);
+    if (resultLink) resultLink.hidden = state.status !== "completed";
     const result = state.result;
     if (result?.outcome === "draw") status.textContent = "Draw game.";
     else if (result?.outcome === "win") {

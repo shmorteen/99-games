@@ -1,0 +1,42 @@
+{% extends "games/base.html" %}
+{% load static %}
+
+{% block extra_head %}
+  <link rel="stylesheet" href="{% static 'play/connect4.css' %}">
+  <link rel="stylesheet" href="{% static 'play/connect4_replay.css' %}">
+{% endblock %}
+
+{% block content %}
+  <div class="connect4-app connect4-history">
+    <header class="connect4-header">
+      <div>
+        <p class="connect4-eyebrow">Connect4 · Final result</p>
+        <h1>{{ result_title }}</h1>
+        <p class="connect4-lede">Completed in {{ replay.result.move_count }} moves.</p>
+      </div>
+      <a class="connect4-back" href="{% url 'games:connect4_replay' session_uuid %}">Watch replay →</a>
+    </header>
+    <section class="connect4-panel" aria-label="Final Connect4 board">
+      <div class="connect4-board-head">
+        <div>
+          <p class="connect4-kicker">Final board</p>
+          <h2>{{ result_title }}</h2>
+        </div>
+      </div>
+      <div class="connect4-board-frame">
+        <table class="connect4-board" aria-label="Final Connect4 board">
+          <caption class="connect4-sr-only">Six rows and seven columns, read from top to bottom.</caption>
+          <tbody>{% for row in board_rows %}
+            <tr>{% for cell in row %}
+              <td class="connect4-cell connect4-cell-{{ cell|default:'empty' }}"
+                  aria-label="Row {{ forloop.parentloop.counter }}, column {{ forloop.counter }}: {{ cell|default:'empty' }}">
+                <span class="connect4-disc" aria-hidden="true">{% if cell == 'red' %}R{% elif cell == 'yellow' %}Y{% endif %}</span>
+              </td>
+            {% endfor %}</tr>
+          {% endfor %}</tbody>
+        </table>
+      </div>
+      <p class="connect4-version">All {{ replay.result.move_count }} moves were verified against the saved match history.</p>
+    </section>
+  </div>
+{% endblock %}

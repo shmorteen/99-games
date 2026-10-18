@@ -1,0 +1,53 @@
+{% extends "games/base.html" %}
+{% load static %}
+
+{% block extra_head %}
+  <link rel="stylesheet" href="{% static 'play/connect4.css' %}">
+  <link rel="stylesheet" href="{% static 'play/connect4_replay.css' %}">
+{% endblock %}
+
+{% block content %}
+  <div id="connect4-replay" class="connect4-app connect4-history">
+    <header class="connect4-header">
+      <div>
+        <p class="connect4-eyebrow">Connect4 · Match replay</p>
+        <h1>Every move, in order.</h1>
+        <p class="connect4-lede">Step through the server-verified match history.</p>
+      </div>
+      <a class="connect4-back" href="{% url 'games:connect4_results' session_uuid %}">← Final result</a>
+    </header>
+    <section class="connect4-panel" aria-label="Connect4 replay board">
+      <div class="connect4-board-head">
+        <div>
+          <p class="connect4-kicker">Replay board</p>
+          <h2 id="replay-status" aria-live="polite">Start of match</h2>
+        </div>
+        <span id="replay-position" class="connect4-connection">Move 0 of {{ replay.result.move_count }}</span>
+      </div>
+      <div class="connect4-board-frame">
+        <table class="connect4-board" aria-label="Connect4 replay board">
+          <caption class="connect4-sr-only">Six rows and seven columns, read from top to bottom.</caption>
+          <tbody id="replay-board">{% for row in board_rows %}
+            <tr>{% for cell in row %}
+              <td class="connect4-cell connect4-cell-empty"
+                  aria-label="Row {{ forloop.parentloop.counter }}, column {{ forloop.counter }}: empty">
+                <span class="connect4-disc" aria-hidden="true"></span>
+              </td>
+            {% endfor %}</tr>
+          {% endfor %}</tbody>
+        </table>
+      </div>
+      <div class="replay-controls" role="group" aria-label="Replay controls">
+        <button id="replay-previous" type="button" disabled>← Previous</button>
+        <label for="replay-step">Move</label>
+        <input id="replay-step" type="range" min="0" max="{{ replay.result.move_count }}" value="0">
+        <button id="replay-next" type="button">Next →</button>
+      </div>
+      <p id="replay-description" class="connect4-version" aria-live="polite">The board is empty.</p>
+      <noscript><p class="connect4-alert">Enable JavaScript to step through the replay. The final board is available on the result page.</p></noscript>
+    </section>
+  </div>
+  {{ replay|json_script:"connect4-replay-bootstrap" }}
+{% endblock %}
+
+{% block extra_scripts %}<script src="{% static 'play/connect4_replay.js' %}" defer></script>{% endblock %}

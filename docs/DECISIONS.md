@@ -214,3 +214,16 @@ version, and idempotency receipt handle concurrent or repeated jobs. Enqueueing
 occurs on transaction commit after session start and accepted actions. The
 worker publishes the committed result to the common game channel. Queue
 delivery is best effort until a durable outbox or reconciliation task is added.
+
+## ADR-016: Verify Connect4 Replays From Action Receipts
+
+Status: Accepted
+
+Each accepted action already has a durable, uniquely keyed receipt containing
+its version, transition events, and saved state. Completed Connect4 replay
+reconstructs the match from the initial state using those receipts rather than
+duplicating writes in another history table. Every step is checked against the
+original action hash, pure rules, and final session state. View responses contain
+only validated, spectator-safe frames. Missing or inconsistent receipts make
+both result and replay unavailable, so a stored terminal result cannot conceal an
+incomplete history.

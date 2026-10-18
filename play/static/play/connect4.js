@@ -11,6 +11,7 @@
   const connectionLabel = document.getElementById("connect4-connection");
   const messageLabel = document.getElementById("connect4-message");
   const moveCountLabel = document.getElementById("connect4-move-count");
+  const resultLink = document.getElementById("connect4-result-link");
   const buttons = [...app.querySelectorAll(".connect4-drop")];
 
   let state = initial.state;
@@ -83,6 +84,7 @@
     renderBoard();
     statusLabel.textContent = statusText();
     moveCountLabel.textContent = String(state.move_count);
+    if (resultLink) resultLink.hidden = state.status !== "completed";
     connectionLabel.textContent = connected ? "Live" : "Connecting…";
     connectionLabel.classList.toggle("is-online", connected);
     buttons.forEach((button) => {

@@ -43,6 +43,7 @@
         </table>
       </div>
       <p class="connect4-version">Move <span id="connect4-move-count">{{ snapshot.state.move_count }}</span> of 42</p>
+      {% if not is_overlay %}<p><a id="connect4-result-link" href="{% url 'games:connect4_results' session.public_id %}"{% if snapshot.state.status != 'completed' %} hidden{% endif %}>View final result and replay →</a></p>{% endif %}
       <p id="connect4-message" class="connect4-message" role="alert"></p>
       <noscript><p class="connect4-alert">Enable JavaScript for live updates.</p></noscript>
     </section>

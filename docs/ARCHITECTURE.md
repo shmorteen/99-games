@@ -254,6 +254,15 @@ Broker publish failures are logged after commit; a durable outbox or automatic
 reconciliation of missed bot jobs is still needed for recovery from a broker
 outage. Connect4 remains unplayable in the catalog.
 
+Completed Connect4 sessions use the existing durable `GameActionReceipt` rows
+for replay history. A read service authorizes the current viewer, starts with
+the stored initial state, reapplies each receipt's drop through the pure rules,
+and checks its version, original action hash, event, serialized states, result,
+and the session's terminal state. Result and replay pages render only validated
+public frames.
+No second action log is written, and malformed or incomplete history returns
+no result or partial replay. These views are available only after completion.
+
 1. A client sends a game or lobby action over HTTP or WebSocket.
 2. The server authenticates the user and authorizes the action.
 3. The relevant service validates the action against current authoritative state.
