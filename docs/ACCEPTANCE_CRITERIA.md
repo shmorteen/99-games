@@ -1174,3 +1174,20 @@ Complete when:
    action count without credentials or hidden game state.
 4. Tests cover authorized access, denied access, tampered history, immutable
    receipts, and unhealthy dependencies. Required checks pass.
+
+## KSA-036 — Add Authenticated Browser Lobby Entry
+
+Complete when:
+
+1. A playable game has a working authenticated, CSRF-protected browser action
+   to create a public waiting lobby and an accessible lobby detail URL.
+2. Creation persists the host membership and audit event atomically, uses a
+   durable request UUID to make retries idempotent, and rejects changed
+   parameters under the same key.
+3. An authenticated second player can join through the existing transactional
+   service; capacity, duplicate membership, inactive games, and spectator or
+   private-lobby access rules cannot be bypassed through HTTP.
+4. Public catalog pages no longer expose inert lobby action links. The seeded
+   incomplete games remain not playable and are not offered lobby creation.
+5. Tests cover creation, retry, join, denial, and rendered destinations. All
+   required checks and the full suite pass.

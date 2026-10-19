@@ -12,29 +12,15 @@ Initial production games:
 
 ## Status
 
-`KSA-001 Initialize Django project and settings`, `KSA-002 Configure
-PostgreSQL`, `KSA-003 Configure Redis and Django Channels`, `KSA-004 Configure
-Celery`, `KSA-005 Add email/password authentication`, `KSA-006 Add
-ArenaProfile`, `KSA-007 Add Google OAuth configuration`, `KSA-008 Add health
-checks`, `KSA-009 Add Docker Compose`, `KSA-010 Add GitHub Actions`,
-`KSA-011 Add GameCategory`, `KSA-012 Add GameDefinition`, `KSA-013 Add game
-catalog pages`, `KSA-014 Add BaseGameEngine`, `KSA-015 Add
-GameEngineRegistry`, `KSA-016 Add GameLobby`, `KSA-017 Add LobbyMembership`,
-`KSA-018 Add lobby join/leave service`, `KSA-019 Add lobby WebSocket
-consumer`, `KSA-020 Add ready-check and game start`, `KSA-021 Add Connect4
-state representation`, and `KSA-022 Add legal move validation` are complete. The
-repository contains a minimal Django project shell with
-environment-driven settings, URL/ASGI/WSGI entrypoints, dependency metadata,
-PostgreSQL-capable database configuration, Redis-backed channel layer
-configuration, Celery worker configuration, django-allauth email/password
-authentication, optional Google OAuth, ArenaProfile public player identity,
-health endpoints, Docker Compose local services, GitHub Actions CI, the first
-game catalog category and definition models, public catalog pages, the shared
-game engine contract, the engine registry, lobby metadata, lobby memberships,
-transactional lobby join/leave services, the lobby WebSocket consumer,
-durable game-session start flow, pure Connect4 state and move-rule modules,
-and smoke tests. Connect4 remains unplayable until its results, transport,
-and interfaces are complete.
+Tasks through KSA-035 built the Django catalog, lobby and game-action
+services, Connect4 rules and interfaces, Hangman and Werewolves engines and
+interfaces, bots, overlays, and Connect4 replay. KSA-036 adds authenticated
+browser entry for creating and joining public lobbies behind the playable-game
+gate. The three seeded games remain **not playable**: a checked component task
+does not prove a complete user journey. Connect4 still lacks a registered
+`BaseGameEngine` adapter and browser ready/start controls. See
+`docs/DEPTH_AUDIT_2026-10-19.md` for source-backed blockers, verification
+status, and release conditions.
 
 ## Documentation
 
@@ -119,7 +105,9 @@ want to delete local database state.
 
 ### Continuous Integration
 
-GitHub Actions runs CI on pushes and pull requests targeting `main`. The
+GitHub Actions currently targets `main`, while this repository's actual default
+branch is `master`; CI coverage for default-branch pushes is an open audit
+finding. The
 workflow installs project dependencies, starts PostgreSQL and Redis service
 containers, applies migrations, and runs:
 

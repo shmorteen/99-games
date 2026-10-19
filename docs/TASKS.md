@@ -47,3 +47,4 @@
 - [x] KSA-033 Add reusable game-family templates
 - [x] KSA-034 Add admin catalog management
 - [x] KSA-035 Add replay and observability tooling
+- [x] KSA-036 Add authenticated browser lobby entry for playable games

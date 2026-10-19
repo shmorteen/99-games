@@ -218,6 +218,14 @@ unready users or filling seats with bots remain later policy work.
 
 ## Realtime Flow
 
+KSA-036 adds an authenticated HTTP entry path for playable public lobbies.
+Creation uses a durable UUID request key and one transaction for the lobby,
+host membership, and join audit event. A second user joins through the existing
+`join_lobby` service, which retains capacity and duplicate-membership guards.
+The browser form exposes no client-controlled game configuration or host ID.
+Seeded games remain behind the playable gate, and ready/start browser controls
+are a separate integration slice.
+
 The `play` app now owns a shared session action service and `/ws/games/<uuid>/`
 consumer. The service reads the durable `authoritative_state` on a locked
 `GameSession` row, checks actor membership and the expected state version, and

@@ -74,16 +74,14 @@
 
         <h2>Lobby Status</h2>
         <dl class="key-value">
-          <div><dt>Active public lobbies</dt><dd>{{ active_public_lobby_count }}</dd></div>
+          <div><dt>Open public lobbies</dt><dd>{{ active_public_lobby_count }}</dd></div>
           <div><dt>Player limits</dt><dd>{{ game.minimum_players }}-{{ game.maximum_players }} players</dd></div>
         </dl>
 
         <h2>Actions</h2>
         {% if game.is_playable %}
-          <div class="actions" id="create-lobby">
-            <a class="button" href="#create-lobby">Create Lobby</a>
-            <a class="button secondary" href="#find-lobby">Find Lobby</a>
-            <a class="button secondary" href="#quick-match">Quick Match</a>
+          <div class="actions">
+            <a class="button" href="{% url 'lobbies:create' game.slug %}">Create Lobby</a>
             <a class="button secondary" href="#rules">View Rules</a>
           </div>
         {% else %}

@@ -224,8 +224,9 @@ def test_playable_games_display_expected_actions(client, monkeypatch):
 
     assert response.status_code == 200
     assert_contains(response, "Create Lobby")
-    assert_contains(response, "Find Lobby")
-    assert_contains(response, "Quick Match")
+    assert_contains(response, reverse("lobbies:create", args=["playable-actions"]))
+    assert_not_contains(response, "Find Lobby")
+    assert_not_contains(response, "Quick Match")
     assert_contains(response, "View Rules")
 
 
@@ -251,7 +252,7 @@ def test_game_detail_page_displays_rules_configuration_and_features(client):
         "Hold the arena",
         "rounds",
         "3",
-        "Active public lobbies",
+        "Open public lobbies",
         "0",
         "2-4 players",
         "Bot Support",

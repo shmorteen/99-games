@@ -1,0 +1,20 @@
+{% extends "games/base.html" %}
+
+{% block content %}
+  <header class="page-header">
+    <p><a href="{% url 'games:detail' game.slug %}">← {{ game.name }}</a></p>
+    <h1>Create a lobby</h1>
+    <p class="lede">Start a public {{ game.name }} lobby and invite another player.</p>
+  </header>
+  <section class="detail-panel">
+    <div class="panel-body">
+      <form method="post">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        {{ form.request_id }}
+        <p>{{ form.name.label_tag }} {{ form.name }} {{ form.name.errors }}</p>
+        <button class="button" type="submit">Create lobby</button>
+      </form>
+    </div>
+  </section>
+{% endblock %}

@@ -49,6 +49,12 @@ The current public catalog routes are:
 Only active games in active categories appear publicly. Unimplemented games are
 shown as `Coming Soon` and do not expose lobby creation actions.
 
+For definitions deliberately marked playable, the catalog now links to an
+authenticated public-lobby creation form. The lobby page shows the persisted
+host and admits another authenticated player through the shared join service.
+All three seeded definitions remain `is_playable=False`; this entry path alone
+does not complete their ready/start or release journeys.
+
 ## Admin Management
 
 Staff with game change permission can manage game availability and featured
