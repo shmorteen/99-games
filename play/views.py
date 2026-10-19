@@ -11,6 +11,7 @@ from games.connect4_moves import legal_actions
 from games.connect4_state import serialize_state
 from games.engine import GameEngineError
 from games.hangman import HangmanEngine
+from games.werewolves import WerewolvesEngine
 from .models import GameSession
 from .services import GameActionError, get_game_snapshot
 from .overlays import get_overlay_snapshot, issue_overlay_token
@@ -281,3 +282,106 @@ def hangman_overlay(request, session_uuid):
 
 def hangman_rules(request):
     return render(request, "play/hangman_rules.html", {"page_title": "Hangman rules"})
+
+
+def _werewolves_session(session_uuid):
+    return get_object_or_404(
+        GameSession.objects.select_related("game", "lobby"),
+        public_id=session_uuid, game__slug="werewolves-vs-villagers",
+        engine_key="werewolves-vs-villagers", engine_version="0.1",
+    )
+
+
+def _werewolves_page(request, session, snapshot, *, audience, overlay=False, token=""):
+    engine = WerewolvesEngine()
+    state = (engine.get_public_state if audience == "player" else engine.get_spectator_state)(
+        session.authoritative_state
+    )
+    actor_id = snapshot["actor_id"] if audience == "player" else None
+    private = (
+        engine.get_private_state(session.authoritative_state, actor_id)
+        if actor_id else None
+    )
+    bootstrap = {
+        "session_uuid": str(session.public_id),
+        "state_version": snapshot["state_version"],
+        "actor_id": actor_id,
+        "state": state,
+        "private_state": private,
+    }
+    if state["status"] == "completed":
+        status_text = f"{state['result']['winner'].title()} win!" if state["result"]["winner"] != "draw" else "Draw game."
+    elif state["phase"] == "night":
+        status_text = "Night vote in progress."
+    else:
+        status_text = "Day vote in progress."
+    overlay_url = None
+    if audience == "player" and session.lobby.host_id == request.user.pk:
+        path = reverse("games:werewolves_overlay", args=[session.public_id])
+        overlay_url = request.build_absolute_uri(
+            path + "?" + urlencode({"token": issue_overlay_token(session)})
+        )
+    context = {
+        "page_title": "Werewolves vs Villagers",
+        "base_template": "play/overlay_base.html" if overlay else "games/base.html",
+        "session": session, "snapshot": bootstrap,
+        "status_text": status_text,
+        "is_player": audience == "player", "is_moderator": audience == "moderator",
+        "is_overlay": overlay, "overlay_url": overlay_url,
+        "websocket_query": "?" + urlencode({"overlay_token": token}) if token else "",
+    }
+    response = render(request, "play/werewolves.html", context)
+    response["Cache-Control"] = "no-store"
+    response["Referrer-Policy"] = "no-referrer"
+    return response
+
+
+@login_required
+def werewolves_player(request, session_uuid):
+    session = _werewolves_session(session_uuid)
+    try:
+        snapshot = get_game_snapshot(session_uuid=str(session.public_id), user=request.user)
+        if snapshot["audience"] != "player":
+            raise Http404
+        return _werewolves_page(request, session, snapshot, audience="player")
+    except (GameActionError, GameEngineError) as error:
+        raise Http404 from error
+
+
+@login_required
+def werewolves_spectator(request, session_uuid):
+    session = _werewolves_session(session_uuid)
+    try:
+        snapshot = get_game_snapshot(session_uuid=str(session.public_id), user=request.user)
+        if snapshot["audience"] != "spectator":
+            raise Http404
+        return _werewolves_page(request, session, snapshot, audience="spectator")
+    except (GameActionError, GameEngineError) as error:
+        raise Http404 from error
+
+
+@login_required
+def werewolves_moderator(request, session_uuid):
+    session = _werewolves_session(session_uuid)
+    try:
+        snapshot = get_game_snapshot(session_uuid=str(session.public_id), user=request.user)
+        if snapshot["audience"] != "player" or session.lobby.host_id != request.user.pk:
+            raise Http404
+        token = issue_overlay_token(session)
+        return _werewolves_page(request, session, snapshot, audience="moderator", token=token)
+    except (GameActionError, GameEngineError) as error:
+        raise Http404 from error
+
+
+def werewolves_overlay(request, session_uuid):
+    session = _werewolves_session(session_uuid)
+    token = request.GET.get("token", "")
+    try:
+        snapshot = get_overlay_snapshot(session_uuid=str(session.public_id), token=token)
+        return _werewolves_page(request, session, snapshot, audience="spectator", overlay=True, token=token)
+    except (GameActionError, GameEngineError) as error:
+        raise Http404 from error
+
+
+def werewolves_rules(request):
+    return render(request, "play/werewolves_rules.html", {"page_title": "Werewolves vs Villagers rules"})

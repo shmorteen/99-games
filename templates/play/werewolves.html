@@ -1,0 +1,45 @@
+{% extends base_template %}
+{% load static %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'play/werewolves.css' %}">{% endblock %}
+{% block content %}
+<main id="werewolves-app" class="werewolves{% if is_overlay %} werewolves-overlay{% endif %}"
+      data-ws-path="/ws/games/{{ session.public_id }}/{{ websocket_query }}"
+      data-player="{% if is_player %}true{% else %}false{% endif %}">
+  {% if not is_overlay %}
+  <header class="werewolves-header">
+    <div><p class="werewolves-kicker">{% if is_moderator %}Host view · Public state only{% elif is_player %}Live match · Private role{% else %}Live spectator view{% endif %}</p>
+      <h1>Werewolves <span>vs Villagers</span></h1><p>Every vote shapes the village. Hidden roles stay hidden until the game ends.</p></div>
+    <nav aria-label="Match navigation"><a href="{% url 'games:werewolves_rules' %}">Rules</a><a href="{% url 'games:catalog' %}">Catalog</a></nav>
+  </header>
+  {% endif %}
+  <div class="werewolves-layout">
+    <section class="werewolves-card" aria-label="Game phase and players">
+      <div class="werewolves-meta"><span id="werewolves-phase">{{ snapshot.state.phase|default:'Completed'|title }}</span><span id="werewolves-round">Round {{ snapshot.state.round_number }}</span><span id="werewolves-connection" role="status">Connecting…</span></div>
+      <h2 id="werewolves-status" aria-live="polite">{{ status_text }}</h2>
+      <p id="werewolves-message" role="alert"></p>
+      <p class="werewolves-summary"><span id="werewolves-votes">{{ snapshot.state.votes_cast }}</span> ballots cast · Phase limit <span id="werewolves-duration">{{ snapshot.state.phase_seconds|default:'—' }}</span> seconds</p>
+      <p id="werewolves-elimination" class="werewolves-elimination">{% if snapshot.state.last_eliminated_actor_id %}A player was eliminated in the previous phase.{% else %}No elimination yet.{% endif %}</p>
+      <ol id="werewolves-players" class="werewolves-players" aria-label="Player seats">
+        {% for participant in snapshot.state.players %}<li data-actor-id="{{ participant.actor_id }}"><span>Seat {{ participant.seat }}</span><span>{% if participant.alive %}Alive{% else %}Eliminated{% endif %}{% if participant.role %} · {{ participant.role|title }}{% endif %}</span></li>{% endfor %}
+      </ol>
+    </section>
+    {% if is_player %}
+    <aside class="werewolves-card" aria-label="Your private role and ballot">
+      <p class="werewolves-kicker">ONLY YOU CAN SEE THIS</p>
+      <h2 id="werewolves-role">{{ snapshot.private_state.role|title }}</h2>
+      <p id="werewolves-role-help">{% if snapshot.private_state.role == 'werewolf' %}You vote at night and during the day.{% else %}You vote during the day. Stay alive and find the wolves.{% endif %}</p>
+      <h3>Cast your ballot</h3>
+      <p id="werewolves-own-vote">{% if snapshot.private_state.vote_target_actor_id %}Ballot submitted for this phase.{% else %}Choose one living player when eligible.{% endif %}</p>
+      <div id="werewolves-controls" class="werewolves-controls" role="group" aria-label="Vote for a player">
+        {% for participant in snapshot.state.players %}{% if participant.actor_id != snapshot.actor_id %}<button type="button" data-target="{{ participant.actor_id }}" disabled>Vote for seat {{ participant.seat }}</button>{% endif %}{% endfor %}
+      </div>
+      <p class="werewolves-note">Your ballot is private until the phase resolves. The server confirms every vote.</p>
+      {% if overlay_url %}<p><a href="{{ overlay_url }}">Open OBS overlay</a> · Expires in 24 hours.</p><p><a href="{% url 'games:werewolves_moderator' session.public_id %}">Open host public view</a></p>{% endif %}
+    </aside>
+    {% endif %}
+  </div>
+  <noscript><p>Enable JavaScript for live state{% if is_player %} and voting{% endif %}.</p></noscript>
+</main>
+{{ snapshot|json_script:"werewolves-bootstrap" }}
+{% endblock %}
+{% block extra_scripts %}<script src="{% static 'play/werewolves.js' %}" defer></script>{% endblock %}

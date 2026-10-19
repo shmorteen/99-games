@@ -40,4 +40,4 @@
 - [x] KSA-029 Add Hangman engine
 - [x] KSA-030 Add Hangman interfaces
 - [x] KSA-031 Add Werewolves vs Villagers engine
-- [ ] KSA-032 Add Werewolves vs Villagers interfaces
+- [x] KSA-032 Add Werewolves vs Villagers interfaces

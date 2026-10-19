@@ -1,0 +1,10 @@
+{% extends "games/base.html" %}
+{% block content %}
+<main style="max-width:52rem;margin:3rem auto;padding:1.5rem">
+  <p><a href="{% url 'games:catalog' %}">← Game catalog</a></p>
+  <h1>Werewolves vs Villagers rules</h1>
+  <p>Five to twenty players receive secret roles from the server. At night, living werewolves each cast one private ballot. During the day, every living player casts one private ballot. A player cannot vote for themselves or vote twice in a phase.</p>
+  <p>When everyone eligible has voted, or the phase ends by server timeout, a single player with the most votes is eliminated. Ties and empty ballots eliminate nobody. Ballot owners and targets remain hidden during play; the eliminated player is announced after resolution.</p>
+  <p>Villagers win when every werewolf is eliminated. Werewolves win when living werewolves equal or outnumber living villagers. If neither team wins by the end of day twenty, the game is a draw. Roles become public when the game ends.</p>
+</main>
+{% endblock %}

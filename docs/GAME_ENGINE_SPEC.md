@@ -186,6 +186,15 @@ reveals roles and the server-derived result. Phase durations are validated and
 stored, but scheduling timers and persisting actions are service work for a
 later task. No bot support is declared.
 
+KSA-032 routes ballots through the shared transactional game-action service.
+Player snapshots contain one actor-scoped private role and ballot; state and
+event fanout remain public-safe. Spectators, signed OBS overlays, and the host
+public view use read-only spectator state. The host view connects with the
+same signed, session-bound overlay token, so it receives no private role over
+WebSocket. Pages for existing sessions and a public rules page are available.
+Automatic phase timeout scheduling and normal lobby start are still separate
+integration work; the catalog entry remains not playable.
+
 ## Test Expectations
 
 Each engine requires tests for:

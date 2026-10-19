@@ -80,7 +80,7 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
                 snapshot = await self._snapshot()
                 await self.send_event(
                     "GAME_ACTION_ACK",
-                    self._audience_payload(outcome.response, snapshot["audience"]),
+                    self._audience_payload(outcome.response, snapshot),
                     request_id=request_id,
                 )
             else:
@@ -104,17 +104,30 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             return
         await self.send_event(
             "GAME_STATE",
-            self._audience_payload(event["response"], snapshot["audience"]),
+            self._audience_payload(event["response"], snapshot),
             request_id=event["request_id"],
         )
 
-    def _audience_payload(self, response, audience):
+    def _audience_payload(self, response, snapshot):
+        audience = snapshot["audience"]
+        if response["state"].get("game") == "werewolves-vs-villagers":
+            same_version = response["state_version"] == snapshot["state_version"]
+            payload = {
+                "state_version": snapshot["state_version"],
+                "state": snapshot["state"],
+                "events": response["events"] if same_version else [],
+                "is_complete": snapshot["state"]["status"] == "completed",
+                "result": snapshot["state"].get("result"),
+            }
+            if audience == "player":
+                payload["private_state"] = snapshot["private_state"]
+            return payload
         if audience == "spectator" and response["state"].get("game") == "connect4":
             return {
                 "state_version": response["state_version"],
                 "state": serialize_state(response["spectator_state"]),
             }
-        return {
+        payload = {
             "state_version": response["state_version"],
             "state": (
                 response["state"] if audience == "player" else response["spectator_state"]
@@ -123,6 +136,7 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             "is_complete": response["is_complete"],
             "result": response["result"],
         }
+        return payload
 
     async def send_event(self, event_type, payload, *, request_id=None):
         await self.send_json({

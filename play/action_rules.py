@@ -6,6 +6,7 @@ from types import MappingProxyType
 from games.connect4_moves import apply_move as apply_connect4_move
 from games.connect4_state import serialize_state as serialize_connect4_state
 from games.hangman import HangmanEngine
+from games.werewolves import WerewolvesEngine
 
 
 @dataclass(frozen=True)
@@ -25,5 +26,10 @@ ACTION_RULES = MappingProxyType({
         apply=HangmanEngine().apply_action,
         public_state=HangmanEngine().get_public_state,
         spectator_state=HangmanEngine().get_spectator_state,
+    ),
+    ("werewolves-vs-villagers", "0.1"): ActionRules(
+        apply=WerewolvesEngine().apply_action,
+        public_state=WerewolvesEngine().get_public_state,
+        spectator_state=WerewolvesEngine().get_spectator_state,
     ),
 })

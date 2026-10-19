@@ -5,6 +5,7 @@ from django.core import signing
 from games.connect4_state import serialize_state
 from games.engine import GameEngineError
 from games.hangman import HangmanEngine
+from games.werewolves import WerewolvesEngine
 from lobbies.models import LobbyBan
 
 from .models import GameSession
@@ -27,11 +28,12 @@ def get_overlay_snapshot(*, session_uuid, token):
         claims = signing.loads(token, salt=OVERLAY_SALT, max_age=OVERLAY_MAX_AGE)
         if not isinstance(claims, dict) or claims.get("session") != str(session_uuid):
             raise GameActionDenied("Overlay link is unavailable.")
-        session = GameSession.objects.select_related("lobby", "lobby__host").get(
+        session = GameSession.objects.select_related("game", "lobby", "lobby__host").get(
             public_id=session_uuid, engine_version="0.1",
         )
         if (session.engine_key, session.game.slug) not in (
-            ("connect4", "connect4"), ("hangman", "hangman")
+            ("connect4", "connect4"), ("hangman", "hangman"),
+            ("werewolves-vs-villagers", "werewolves-vs-villagers"),
         ):
             raise GameActionDenied("Overlay link is unavailable.")
         host = session.lobby.host
@@ -40,11 +42,12 @@ def get_overlay_snapshot(*, session_uuid, token):
             or LobbyBan.objects.active().filter(lobby=session.lobby, user=host).exists()
         ):
             raise GameActionDenied("Overlay link is unavailable.")
-        state = (
-            serialize_state(session.spectator_state)
-            if session.engine_key == "connect4"
-            else HangmanEngine().get_spectator_state(session.authoritative_state)
-        )
+        if session.engine_key == "connect4":
+            state = serialize_state(session.spectator_state)
+        elif session.engine_key == "hangman":
+            state = HangmanEngine().get_spectator_state(session.authoritative_state)
+        else:
+            state = WerewolvesEngine().get_spectator_state(session.authoritative_state)
     except (signing.BadSignature, GameSession.DoesNotExist, GameEngineError,
             TypeError, ValueError) as error:
         raise GameActionDenied("Overlay link is unavailable.") from error

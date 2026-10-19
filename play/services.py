@@ -14,6 +14,7 @@ from django.utils import timezone
 from games.connect4_state import serialize_state
 from games.engine import GameEngineError, StaleGameState
 from games.hangman import HangmanEngine
+from games.werewolves import WerewolvesEngine
 from lobbies.models import LobbyBan, LobbyStatus, MembershipRole, PLAYER_SEAT_ROLES
 from .action_rules import ACTION_RULES
 from .locks import GameActionLockUnavailable, acquire_game_action_lock
@@ -203,7 +204,20 @@ def get_game_snapshot(*, session_uuid: str, user) -> dict:
     ):
         raise GameActionDenied("Game connection is not allowed.")
     state = session.public_state if is_player else session.spectator_state
-    if session.engine_key == "hangman" and session.engine_version == "0.1":
+    private_state = participant.private_state if is_player else None
+    if session.engine_key == "werewolves-vs-villagers" and session.engine_version == "0.1":
+        try:
+            engine = WerewolvesEngine()
+            state = (engine.get_public_state if is_player else engine.get_spectator_state)(
+                session.authoritative_state
+            )
+            private_state = (
+                engine.get_private_state(session.authoritative_state, participant.actor_id)
+                if is_player else None
+            )
+        except GameEngineError as error:
+            raise GameActionDenied("Game state is unavailable.") from error
+    elif session.engine_key == "hangman" and session.engine_version == "0.1":
         try:
             engine = HangmanEngine()
             state = (engine.get_public_state if is_player else engine.get_spectator_state)(
@@ -224,8 +238,7 @@ def get_game_snapshot(*, session_uuid: str, user) -> dict:
         "actor_id": participant.actor_id if is_player else None,
         "state": state,
         "private_state": (
-            {} if session.engine_key == "hangman" and is_player
-            else participant.private_state if is_player else None
+            {} if session.engine_key == "hangman" and is_player else private_state
         ),
     }
 

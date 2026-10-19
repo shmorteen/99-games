@@ -1106,3 +1106,25 @@ Complete when:
    malformed state, role separation, and no bot support.
 6. The game stays unplayable until shared action transport, timers, and the
    KSA-032 interfaces are complete. Django and Python checks pass.
+
+## KSA-032 — Add Werewolves vs Villagers Interfaces
+
+Complete when:
+
+1. Current players can view their own role, phase, seats, and legal ballot
+   targets for an existing session. A player never receives another live role
+   or any other ballot through HTTP or WebSocket.
+2. Votes use the shared, versioned game-action service. Browser controls wait
+   for server confirmation, disable when ineligible, and retry unresolved
+   requests after reconnect using the same request UUID.
+3. Current spectators have a read-only, role-safe view. The current host has
+   a moderator-safe public view whose WebSocket carries no private role.
+4. A host-issued signed overlay URL offers expiring, revocable, read-only
+   spectator state to OBS without an account cookie. Player, spectator, host,
+   and overlay responses disable caching.
+5. A public rules page explains secret roles, phases, ballots, ties,
+   eliminations, both team wins, and the draw cap.
+6. HTTP, service, WebSocket, and browser tests cover authorized and denied
+   access, private-state isolation, live fanout, and reconnect behavior.
+   The game remains unplayable pending automatic timer delivery, normal lobby
+   start, and final product integration. Required checks pass.
