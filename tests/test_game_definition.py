@@ -361,6 +361,7 @@ def test_game_definition_admin_allows_superuser_to_create_unimplemented_game(cli
             "category": str(category("party-games").pk),
             "name": "Charades",
             "slug": "",
+            "display_order": "0",
             "short_description": "Act prompts for teammates.",
             "full_description": "A future party game.",
             "engine_key": "charades",

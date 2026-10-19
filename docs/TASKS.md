@@ -45,5 +45,5 @@
 # Current milestone: Scale Toward 99 Games
 
 - [x] KSA-033 Add reusable game-family templates
-- [ ] KSA-034 Add admin catalog management
+- [x] KSA-034 Add admin catalog management
 - [ ] KSA-035 Add replay and observability tooling

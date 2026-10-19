@@ -49,6 +49,18 @@ The current public catalog routes are:
 Only active games in active categories appear publicly. Unimplemented games are
 shown as `Coming Soon` and do not expose lobby creation actions.
 
+## Admin Management
+
+Staff with game change permission can manage game availability and featured
+status from the game changelist, including bulk actions. The actions update
+`updated_at` and take effect in the public catalog immediately. Games have a
+nonnegative `display_order` within their category; lower values appear first,
+then name. The changelist exposes this order for quick editing. The game form
+edits catalog copy, assets, configuration, and the bot, spectator, ranked,
+private-lobby, and broadcast capability flags. Playable status is edited on
+the validated game form, never through a bulk action; engine registration alone
+does not satisfy the full readiness checklist below.
+
 ## Readiness Checklist
 
 - Engine registered.

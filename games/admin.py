@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils import timezone
 
 from .models import GameCategory, GameDefinition
 
@@ -32,24 +33,24 @@ class GameCategoryAdmin(admin.ModelAdmin):
             obj.delete()
 
 
-@admin.action(description="Mark selected games active")
+@admin.action(description="Mark selected games active", permissions=["change"])
 def activate_games(modeladmin, request, queryset):
-    queryset.update(is_active=True)
+    queryset.update(is_active=True, updated_at=timezone.now())
 
 
-@admin.action(description="Mark selected games inactive")
+@admin.action(description="Mark selected games inactive", permissions=["change"])
 def deactivate_games(modeladmin, request, queryset):
-    queryset.update(is_active=False)
+    queryset.update(is_active=False, updated_at=timezone.now())
 
 
-@admin.action(description="Mark selected games featured")
+@admin.action(description="Mark selected games featured", permissions=["change"])
 def feature_games(modeladmin, request, queryset):
-    queryset.update(is_featured=True)
+    queryset.update(is_featured=True, updated_at=timezone.now())
 
 
-@admin.action(description="Remove selected games from featured")
+@admin.action(description="Remove selected games from featured", permissions=["change"])
 def unfeature_games(modeladmin, request, queryset):
-    queryset.update(is_featured=False)
+    queryset.update(is_featured=False, updated_at=timezone.now())
 
 
 @admin.register(GameDefinition)
@@ -58,6 +59,7 @@ class GameDefinitionAdmin(admin.ModelAdmin):
         "name",
         "slug",
         "category",
+        "display_order",
         "is_playable",
         "is_active",
         "is_featured",
@@ -65,6 +67,7 @@ class GameDefinitionAdmin(admin.ModelAdmin):
         "maximum_players",
         "estimated_duration_minutes",
     )
+    list_editable = ("display_order", "is_active", "is_featured")
     list_filter = (
         "category",
         "is_active",
@@ -73,11 +76,13 @@ class GameDefinitionAdmin(admin.ModelAdmin):
         "supports_bots",
         "supports_spectators",
         "supports_ranked",
+        "supports_private_lobbies",
+        "supports_broadcasts",
     )
     search_fields = ("name", "slug", "short_description", "engine_key")
     prepopulated_fields = {"slug": ("name",)}
     readonly_fields = ("public_id", "created_at", "updated_at")
-    ordering = ("category__display_order", "name")
+    ordering = ("category__display_order", "display_order", "name", "pk")
     actions = (activate_games, deactivate_games, feature_games, unfeature_games)
     list_select_related = ("category",)
     fieldsets = (
@@ -89,6 +94,7 @@ class GameDefinitionAdmin(admin.ModelAdmin):
                     "category",
                     "name",
                     "slug",
+                    "display_order",
                     "short_description",
                     "full_description",
                     "thumbnail",

@@ -49,7 +49,8 @@ def build_game_engine_check_messages(
 
     from .models import GameDefinition
 
-    playable_games = GameDefinition.objects.filter(is_playable=True).only(
+    # Avoid default ordering fields that may not exist yet while migrate runs.
+    playable_games = GameDefinition.objects.filter(is_playable=True).order_by().only(
         "slug",
         "name",
         "engine_key",

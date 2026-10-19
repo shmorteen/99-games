@@ -1145,3 +1145,17 @@ Complete when:
    Django checks, migration checks, migrations, and the full Python suite pass.
 5. Documentation explains which rules remain with each engine and how a new
    game can compose these family helpers through `BaseGameEngine`.
+
+## KSA-034 — Add Admin Catalog Management
+
+Complete when:
+
+1. Game definitions have an editable, nonnegative order within their category,
+   and public catalog queries use it with a deterministic tie-breaker.
+2. Authorized admins can edit availability, featured status, catalog metadata,
+   and capability flags. The game changelist exposes the frequent edits and
+   filters; bulk actions require change permission and update timestamps.
+3. Playable status stays on the model-validated edit form rather than a bulk
+   action. Current incomplete games remain unplayable.
+4. Tests cover ordering, successful bulk changes, rejection without change
+   permission, and existing admin form validation. Migration and full checks pass.

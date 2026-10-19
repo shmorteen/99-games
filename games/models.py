@@ -185,6 +185,7 @@ class GameDefinition(models.Model):
     default_configuration = models.JSONField(default=dict, blank=True)
     thumbnail = models.CharField(max_length=GAME_ASSET_MAX_LENGTH, blank=True)
     banner = models.CharField(max_length=GAME_ASSET_MAX_LENGTH, blank=True)
+    display_order = models.PositiveIntegerField(default=0, db_index=True)
     is_playable = models.BooleanField(default=False, db_index=True)
     is_featured = models.BooleanField(default=False, db_index=True)
     is_active = models.BooleanField(default=True, db_index=True)
@@ -194,7 +195,7 @@ class GameDefinition(models.Model):
     objects = GameDefinitionQuerySet.as_manager()
 
     class Meta:
-        ordering = ("category__display_order", "name")
+        ordering = ("category__display_order", "display_order", "name", "pk")
         indexes = [
             models.Index(fields=("slug",), name="game_def_slug_idx"),
             models.Index(fields=("category",), name="game_def_category_idx"),

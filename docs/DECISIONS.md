@@ -254,3 +254,15 @@ different games into one state shape. It also leaves PostgreSQL persistence,
 locks, idempotency, and WebSocket delivery with the shared application service.
 The hidden-role helper copies an allowlist of fields and accepts only a Boolean
 role-reveal flag, so unknown fields cannot be copied to live public state.
+
+## ADR-019: Curated Catalog Order and Admin Availability
+
+Status: Accepted
+
+`GameDefinition.display_order` provides a stable order within a category;
+name and primary key break ties. Availability and featured status remain
+separate flags. Admin bulk actions for those flags require model change
+permission and update `updated_at`. Capability flags and playable status stay
+on the validated edit form so a bulk action cannot bypass playable-engine
+validation. Full product readiness remains a release decision documented in
+the catalog checklist, not an assertion inferred from engine registration.
