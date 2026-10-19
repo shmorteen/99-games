@@ -25,8 +25,26 @@ def build_connect4_replay(*, session_uuid, user):
     server rules and serialized through the Connect4 public-state whitelist.
     """
 
+    return _build_connect4_replay(session_uuid=session_uuid, user=user, staff=False)
+
+
+def build_connect4_admin_replay(*, session_uuid, user):
+    """Let an authorized operator inspect validated, public-only replay frames."""
+
+    if not (
+        getattr(user, "is_authenticated", False)
+        and getattr(user, "is_active", False)
+        and getattr(user, "is_staff", False)
+        and user.has_perm("play.view_gamesession")
+    ):
+        raise ReplayUnavailable("Completed replay is unavailable.")
+    return _build_connect4_replay(session_uuid=session_uuid, user=user, staff=True)
+
+
+def _build_connect4_replay(*, session_uuid, user, staff):
     with transaction.atomic():
-        get_game_snapshot(session_uuid=session_uuid, user=user)
+        if not staff:
+            get_game_snapshot(session_uuid=session_uuid, user=user)
         session = GameSession.objects.select_related("game").filter(
             public_id=session_uuid, game__slug="connect4",
             engine_key="connect4", engine_version="0.1",

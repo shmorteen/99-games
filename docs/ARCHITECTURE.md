@@ -263,6 +263,16 @@ public frames.
 No second action log is written, and malformed or incomplete history returns
 no result or partial replay. These views are available only after completion.
 
+KSA-035 exposes these durable records for operations. The admin receipt list is
+view-only and omits stored response JSON. Each session admin page links to a
+read-only inspection report containing receipt version continuity and, for a
+completed Connect4 session, validated public replay frames. Tampered replay
+history returns an unavailable marker without partial frames. The staff-only
+`/admin/game-health/` endpoint requires `play.view_gamesession` and reports
+database/Redis readiness, active-session count, and actions accepted in the
+last five minutes. It does not count live WebSocket connections; that would
+require durable presence instrumentation and is not inferred from sessions.
+
 1. A client sends a game or lobby action over HTTP or WebSocket.
 2. The server authenticates the user and authorizes the action.
 3. The relevant service validates the action against current authoritative state.

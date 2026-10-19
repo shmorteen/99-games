@@ -5,6 +5,7 @@ from django.urls import include, path
 from django.views.decorators.http import require_GET
 
 from .health import liveness, readiness
+from play.operations import game_operations_health
 
 
 @require_GET
@@ -14,6 +15,7 @@ def project_shell(request):
 
 
 urlpatterns = [
+    path("admin/game-health/", game_operations_health, name="game-operations-health"),
     path("admin/", admin.site.urls),
     path("", project_shell, name="project-shell"),
     path("accounts/", include("allauth.urls")),

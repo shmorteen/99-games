@@ -46,4 +46,4 @@
 
 - [x] KSA-033 Add reusable game-family templates
 - [x] KSA-034 Add admin catalog management
-- [ ] KSA-035 Add replay and observability tooling
+- [x] KSA-035 Add replay and observability tooling

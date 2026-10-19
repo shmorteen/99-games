@@ -1159,3 +1159,18 @@ Complete when:
    action. Current incomplete games remain unplayable.
 4. Tests cover ordering, successful bulk changes, rejection without change
    permission, and existing admin form validation. Migration and full checks pass.
+
+## KSA-035 — Add Replay and Observability Tooling
+
+Complete when:
+
+1. A view-only admin action trail lists persisted game receipts and can be
+   searched by session or actor without exposing raw state or response JSON.
+2. A session inspection report shows receipt version continuity. Completed
+   Connect4 sessions include validated, public-only replay frames; altered
+   history yields no partial replay.
+3. A staff-only realtime health endpoint requires game-session view permission
+   and reports dependency status, active-session count, and recent accepted
+   action count without credentials or hidden game state.
+4. Tests cover authorized access, denied access, tampered history, immutable
+   receipts, and unhealthy dependencies. Required checks pass.

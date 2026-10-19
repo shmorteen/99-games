@@ -266,3 +266,15 @@ permission and update `updated_at`. Capability flags and playable status stay
 on the validated edit form so a bulk action cannot bypass playable-engine
 validation. Full product readiness remains a release decision documented in
 the catalog checklist, not an assertion inferred from engine registration.
+
+## ADR-020: Observe Durable Actions Without Exposing Hidden State
+
+Status: Accepted
+
+Operational replay inspection reads the existing action receipts rather than
+writing a second audit log. The admin trail is immutable and shows metadata
+only; raw receipt responses may contain audience-specific state. The session
+inspector uses the existing Connect4 replay validator to return public frames
+only when the full history is valid. Game-session view permission gates the
+inspector and health summary. Health reports dependency availability and
+aggregate activity, without Redis connection strings or per-player state.
