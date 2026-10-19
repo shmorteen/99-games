@@ -1128,3 +1128,20 @@ Complete when:
    access, private-state isolation, live fanout, and reconnect behavior.
    The game remains unplayable pending automatic timer delivery, normal lobby
    start, and final product integration. Required checks pass.
+
+## KSA-033 — Add Reusable Game-Family Templates
+
+Complete when:
+
+1. Pure reusable helpers cover grid placement and line detection, word masks,
+   plurality voting, hidden-role public projection, and seated turn rotation.
+2. Existing Connect4, Hangman, and Werewolves engines use the relevant helpers
+   without changing state schemas, action payloads, public/private visibility,
+   terminal results, or event behavior.
+3. Helpers fail clearly on malformed arguments and do not mutate input data.
+   Hidden-role projection copies only allowlisted public fields and requires
+   an explicit Boolean before completed roles are revealed.
+4. Focused helper and game regression tests cover success and failure paths.
+   Django checks, migration checks, migrations, and the full Python suite pass.
+5. Documentation explains which rules remain with each engine and how a new
+   game can compose these family helpers through `BaseGameEngine`.

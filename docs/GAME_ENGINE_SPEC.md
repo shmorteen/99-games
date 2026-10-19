@@ -195,6 +195,31 @@ WebSocket. Pages for existing sessions and a public rules page are available.
 Automatic phase timeout scheduling and normal lobby start are still separate
 integration work; the catalog entry remains not playable.
 
+## Reusable Game-Family Primitives (KSA-033)
+
+`games.families` holds pure patterns used by current engines and available to
+future games without adding a Django application per game:
+
+| Family | Helper | Current use |
+| --- | --- | --- |
+| Grid | `grid.drop_row`, `grid.winning_markers` | Connect4 placement and line detection |
+| Word | `word.mask_answer` | Hangman public and spectator mask |
+| Vote | `vote.plurality_target` | Werewolves phase resolution |
+| Hidden role | `hidden_role.public_players` | Werewolves role-safe public projection |
+| Turn based | `turn_based.actor_for_turn` | Connect4 and Hangman seat rotation |
+
+These helpers return detached data or scalar decisions and never write a model,
+send a message, or choose a game result. The engine remains responsible for
+validating authoritative state, actor membership, legal actions, completion,
+and result consistency. In particular, callers validate grid gravity, ballot
+eligibility, and seated actor uniqueness before using the corresponding
+helper. The hidden-role projection uses an explicit Boolean reveal flag and
+copies only allowlisted fields; live callers must use `reveal_roles=False`.
+
+Future engines can compose these helpers while preserving the same
+`BaseGameEngine` contract and shared action service. Existing game state
+schemas and action payloads do not change in KSA-033.
+
 ## Test Expectations
 
 Each engine requires tests for:

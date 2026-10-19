@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from collections import Counter
 from collections.abc import Mapping, Sequence
 import secrets
 from uuid import UUID
@@ -12,6 +11,8 @@ from .engine import (
     IllegalGameAction, InvalidActionPayload, InvalidGameActor,
     InvalidGameConfiguration, StaleGameState, UnauthorizedGameAction,
 )
+from .families.hidden_role import public_players
+from .families.vote import plurality_target
 
 
 SCHEMA_VERSION = "werewolves.state.v1"
@@ -151,11 +152,7 @@ class WerewolvesEngine(BaseGameEngine):
             "status": current["status"], "phase": current["phase"],
             "round_number": current["round_number"],
             "phase_seconds": current["day_seconds"] if current["phase"] == "day" else current["night_seconds"] if current["phase"] == "night" else None,
-            "players": [
-                {**{key: player[key] for key in ("actor_id", "seat", "alive")},
-                 **({"role": player["role"]} if completed else {})}
-                for player in current["players"]
-            ],
+            "players": public_players(current["players"], reveal_roles=completed),
             "votes_cast": len(current["votes"]),
             "last_eliminated_actor_id": current["last_eliminated_actor_id"],
             **({"result": current["result"]} if completed else {}),
@@ -217,9 +214,7 @@ class WerewolvesEngine(BaseGameEngine):
 
     def _resolve(self, current: dict, events: list[dict]) -> GameTransition:
         phase = current["phase"]
-        tallies = Counter(current["votes"].values())
-        leaders = [actor for actor, votes in tallies.items() if votes == max(tallies.values())] if tallies else []
-        eliminated = leaders[0] if len(leaders) == 1 else None
+        eliminated = plurality_target(current["votes"].values())
         if eliminated is not None:
             self._actor(current, eliminated)["alive"] = False
         current["votes"] = {}

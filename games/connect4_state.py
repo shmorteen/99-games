@@ -17,6 +17,8 @@ from .engine import (
     JSONDict,
     assert_json_serializable,
 )
+from .families.grid import winning_markers
+from .families.turn_based import actor_for_turn
 
 
 SCHEMA_VERSION = "connect4.state.v1"
@@ -108,7 +110,9 @@ def serialize_state(state: Mapping[str, object]) -> JSONDict:
     result = calculate_result(board, players, move_count)
     status = state["status"]
     if status == "in_progress":
-        expected_actor = players[move_count % 2]["actor_id"]
+        expected_actor = actor_for_turn(
+            [player["actor_id"] for player in players], move_count
+        )
         if (
             result is not None
             or "result" in state
@@ -148,25 +152,10 @@ def calculate_result(
 ) -> JSONDict | None:
     """Derive the only possible terminal result from the board and move parity."""
 
-    winning_markers: set[str] = set()
-    for row in range(ROWS):
-        for column in range(COLUMNS):
-            marker = board[row][column]
-            if marker is None:
-                continue
-            for row_step, column_step in ((0, 1), (1, 0), (1, 1), (1, -1)):
-                if all(
-                    0 <= row + offset * row_step < ROWS
-                    and 0 <= column + offset * column_step < COLUMNS
-                    and board[row + offset * row_step][column + offset * column_step]
-                    == marker
-                    for offset in range(CONNECT_LENGTH)
-                ):
-                    winning_markers.add(marker)
-
-    if winning_markers:
+    markers_with_lines = winning_markers(board, CONNECT_LENGTH)
+    if markers_with_lines:
         last_player = players[(move_count - 1) % 2]
-        if move_count == 0 or winning_markers != {last_player["marker"]}:
+        if move_count == 0 or markers_with_lines != {last_player["marker"]}:
             raise InvalidConnect4State("Connect4 winner conflicts with move order.")
         return {"outcome": "win", "winner_actor_id": last_player["actor_id"]}
     if move_count == ROWS * COLUMNS:

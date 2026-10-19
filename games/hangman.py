@@ -12,6 +12,8 @@ from .engine import (
     IllegalGameAction, InvalidActionPayload, InvalidGameActor,
     InvalidGameConfiguration, StaleGameState, UnauthorizedGameAction,
 )
+from .families.turn_based import actor_for_turn
+from .families.word import mask_answer
 
 
 WORDS = ("ORBIT", "PLANET", "GALAXY", "PUZZLE", "CASTLE", "FOREST", "ROCKET", "BRIDGE")
@@ -90,7 +92,7 @@ class HangmanEngine(BaseGameEngine):
         if won and wrong == maximum:
             raise InvalidHangmanState()
         complete = won or wrong == maximum
-        if state.get("status") != ("completed" if complete else "in_progress") or state.get("turn_actor_id") != (None if complete else players[count % len(players)]):
+        if state.get("status") != ("completed" if complete else "in_progress") or state.get("turn_actor_id") != (None if complete else actor_for_turn(players, count)):
             raise InvalidHangmanState()
         return {
             "schema_version": SCHEMA_VERSION, "game": "hangman", "answer": answer,
@@ -103,7 +105,7 @@ class HangmanEngine(BaseGameEngine):
         current = self._validated(state)
         answer = current.pop("answer")
         guessed = set(current["guessed_letters"])
-        current["mask"] = "".join(letter if letter in guessed else "_" for letter in answer)
+        current["mask"] = mask_answer(answer, guessed)
         if current["status"] == "completed":
             current["answer"] = answer
             current["result"] = self.build_results(state)
@@ -158,7 +160,7 @@ class HangmanEngine(BaseGameEngine):
         won = set(current["answer"]) <= set(current["guessed_letters"])
         complete = won or current["wrong_guesses"] == current["max_wrong_guesses"]
         current["status"] = "completed" if complete else "in_progress"
-        current["turn_actor_id"] = None if complete else current["players"][current["action_count"] % len(current["players"])]
+        current["turn_actor_id"] = None if complete else actor_for_turn(current["players"], current["action_count"])
         events = [event]
         result = self.build_results(current) if complete else None
         if result is not None:

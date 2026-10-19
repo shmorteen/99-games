@@ -9,7 +9,9 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 
-from .connect4_state import COLUMNS, ROWS, calculate_result, serialize_state
+from .connect4_state import COLUMNS, calculate_result, serialize_state
+from .families.grid import drop_row
+from .families.turn_based import actor_for_turn
 from .engine import (
     GameAlreadyCompleted,
     GameTransition,
@@ -55,14 +57,9 @@ def apply_move(
     column = _action_column(action)
     if column < 0 or column >= COLUMNS:
         raise IllegalGameAction("Connect4 column is outside the board.")
-    if current["board"][0][column] is not None:
+    row = drop_row(current["board"], column)
+    if row is None:
         raise IllegalGameAction("Connect4 column is full.")
-
-    row = next(
-        row_index
-        for row_index in range(ROWS - 1, -1, -1)
-        if current["board"][row_index][column] is None
-    )
     marker = player["marker"]
     current["board"][row][column] = marker
     current["move_count"] += 1
@@ -70,7 +67,10 @@ def apply_move(
         current["board"], current["players"], current["move_count"]
     )
     next_actor = (
-        current["players"][current["move_count"] % 2]["actor_id"]
+        actor_for_turn(
+            [player["actor_id"] for player in current["players"]],
+            current["move_count"],
+        )
         if result is None
         else None
     )

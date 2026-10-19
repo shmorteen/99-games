@@ -241,3 +241,16 @@ and empty ballots eliminate nobody. A twenty-round cap gives an unattended or
 persistently tied game a deterministic draw. The engine validates phase
 durations but does not schedule timers or persist transitions; those belong to
 the shared service integration.
+
+## ADR-018: Compose Pure Game-Family Primitives
+
+Status: Accepted
+
+Reusable grid, word, vote, hidden-role, and turn-rotation logic lives in
+`games.families`. Existing engines call these pure helpers, while retaining
+their own configuration, action validation, state invariants, visibility
+policy, timeouts, and results. This avoids a hierarchy that would force very
+different games into one state shape. It also leaves PostgreSQL persistence,
+locks, idempotency, and WebSocket delivery with the shared application service.
+The hidden-role helper copies an allowlist of fields and accepts only a Boolean
+role-reveal flag, so unknown fields cannot be copied to live public state.
