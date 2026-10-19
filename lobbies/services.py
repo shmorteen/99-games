@@ -3,13 +3,16 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import timedelta
 import logging
+from uuid import UUID
 
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.db import IntegrityError, transaction
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 
 from games.engine import GameEngineError
+from games.models import GameDefinition
 from games.registry import GameEngineRegistryError, game_engine_registry
 from play.models import GameSession, GameSessionParticipant
 from .locks import LobbyStartLockUnavailable, acquire_lobby_start_lock
@@ -94,6 +97,60 @@ HOST_SUCCESSOR_ROLES = (
 )
 ACTIVE_GAME_LEAVE_POLICY = "disconnect_forfeit"
 MAX_JOIN_RETRIES = 2
+
+
+def create_public_lobby(
+    *, game: GameDefinition, user, name: str, request_id: str
+) -> GameLobby:
+    """Create a waiting lobby and host seat as one idempotent database operation."""
+
+    _require_authenticated_user(user)
+    _require_unsuspended_user(user)
+    try:
+        key = UUID(str(request_id))
+    except (TypeError, ValueError, AttributeError) as error:
+        raise LobbyValidationError("A valid creation request ID is required.") from error
+    normalized_name = " ".join((name or "").strip().split())
+    if not normalized_name:
+        raise LobbyValidationError("Lobby name is required.")
+
+    with transaction.atomic():
+        locked_user = get_user_model().objects.select_for_update().get(pk=user.pk)
+        _require_unsuspended_user(locked_user)
+        existing = GameLobby.objects.filter(creation_request_id=key).first()
+        if existing is not None:
+            if (
+                existing.host_id != user.pk
+                or existing.game_id != game.pk
+                or existing.name != normalized_name
+            ):
+                raise LobbyValidationError(
+                    "Creation request was used for another lobby."
+                )
+            return existing
+
+        selected_game = GameDefinition.objects.select_for_update().select_related(
+            "category"
+        ).get(pk=game.pk)
+        if not (
+            selected_game.is_active
+            and selected_game.category.is_active
+            and selected_game.is_playable
+        ):
+            raise LobbyNotJoinable("This game is not available for lobby creation.")
+        try:
+            with transaction.atomic():
+                lobby = GameLobby.objects.create_for_host(
+                    host=locked_user,
+                    game=selected_game,
+                    name=normalized_name,
+                    visibility=LobbyVisibility.PUBLIC,
+                    creation_request_id=key,
+                )
+        except IntegrityError as error:
+            raise LobbyJoinConflict("Lobby creation conflicted; retry.") from error
+        join_lobby(lobby=lobby, user=locked_user, idempotency_key=str(key))
+        return lobby
 
 
 def join_lobby(

@@ -20,6 +20,7 @@ urlpatterns = [
     path("", project_shell, name="project-shell"),
     path("accounts/", include("allauth.urls")),
     path("games/", include("games.urls")),
+    path("lobbies/", include("lobbies.urls")),
     path("health/live/", liveness, name="health-live"),
     path("health/ready/", readiness, name="health-ready"),
 ]

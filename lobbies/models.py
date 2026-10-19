@@ -122,6 +122,9 @@ class GameLobbyManager(models.Manager.from_queryset(GameLobbyQuerySet)):
 
 class GameLobby(models.Model):
     public_id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    creation_request_id = models.UUIDField(
+        null=True, blank=True, unique=True, editable=False
+    )
     lobby_code = models.CharField(
         max_length=LOBBY_CODE_MAX_LENGTH,
         unique=True,

@@ -27,7 +27,7 @@
     <div class="actions">
       <a class="button secondary" href="{% url 'games:detail' game.slug %}">View Rules</a>
       {% if game.is_playable %}
-        <a class="button" href="{% url 'games:detail' game.slug %}#create-lobby">Create Lobby</a>
+        <a class="button" href="{% url 'lobbies:create' game.slug %}">Create Lobby</a>
       {% endif %}
     </div>
   </div>

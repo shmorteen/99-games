@@ -1,0 +1,28 @@
+{% extends "games/base.html" %}
+
+{% block content %}
+  <header class="page-header">
+    <p><a href="{% url 'games:detail' lobby.game.slug %}">← {{ lobby.game.name }}</a></p>
+    <h1>{{ lobby.name }}</h1>
+    <p class="lede">Lobby code: <strong>{{ lobby.lobby_code }}</strong></p>
+    <p class="muted">Lobby ID: {{ lobby.public_id }}</p>
+  </header>
+  <section class="detail-panel">
+    <div class="panel-body">
+      <h2>Players</h2>
+      <p>{{ seated_count }} of {{ lobby.maximum_players }} player seats occupied.</p>
+      <ul>
+        {% for member in members %}
+          <li>{{ member.user.username|default:member.bot_reference }} — {{ member.get_role_display }}</li>
+        {% endfor %}
+      </ul>
+      {% if error %}<p role="alert">{{ error }}</p>{% endif %}
+      {% if can_join %}
+        <form action="{% url 'lobbies:join' lobby.public_id %}" method="post">
+          {% csrf_token %}
+          <button class="button" type="submit">Join as player</button>
+        </form>
+      {% endif %}
+    </div>
+  </section>
+{% endblock %}

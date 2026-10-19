@@ -7,6 +7,8 @@ from django.db.models import Q
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, render
 
+from lobbies.models import GameLobby, LobbyStatus, LobbyVisibility
+
 from .models import GameCategory, GameDefinition
 
 
@@ -130,10 +132,13 @@ def game_category_detail(request: HttpRequest, slug: str) -> HttpResponse:
 
 def game_detail(request: HttpRequest, slug: str) -> HttpResponse:
     game = get_object_or_404(base_game_queryset(), slug=slug)
+    open_public_lobbies = GameLobby.objects.filter(
+        game=game, status=LobbyStatus.WAITING, visibility=LobbyVisibility.PUBLIC
+    ).count()
     context = {
         **shared_catalog_context(request),
         "page_title": game.name,
         "game": game,
-        "active_public_lobby_count": 0,
+        "active_public_lobby_count": open_public_lobbies,
     }
     return render(request, "games/detail.html", context)
